@@ -5,3 +5,6 @@ dist/
 coverage/
 package-lock.json
 .env
+
+# Vendored upstream skill: preserve original formatting.
+.agents/skills/ui-ux-pro-max/

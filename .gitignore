@@ -28,3 +28,7 @@ coverage/
 *.tsbuildinfo
 playwright-report/
 test-results/
+
+# Local Python skill execution.
+__pycache__/
+*.pyc

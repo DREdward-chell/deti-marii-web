@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { CalendarPage } from './features/calendar/CalendarPage'
 import { AuthForm } from './features/auth/AuthForm'
 import { ProfileForm } from './features/profile/ProfileForm'
 import logo from './assets/logo.svg'
@@ -9,7 +10,36 @@ import { Card } from './shared/ui/Card'
 import { Journey } from './shared/ui/Journey'
 import { ThemeToggle } from './shared/ui/ThemeToggle'
 
+const calendarRoute = () => window.location.pathname === '/calendar'
+const noSession = () => {
+  window.location.assign('/')
+}
+
 export default function App() {
+  if (
+    calendarRoute() &&
+    new URLSearchParams(window.location.search).get('demo') === '1'
+  ) {
+    return (
+      <div className="page page--calendar">
+        <header className="header">
+          <a className="brand" href="/" aria-label="Дети Марии — главная">
+            <img src={logo} alt="" width="162" height="32" />
+            <span>Пространство волонтёров</span>
+          </a>
+          <ThemeToggle />
+        </header>
+        <main>
+          <CalendarPage demo onSessionExpired={noSession} />
+        </main>
+        <footer>Дети Марии · Вместе создаём пространство заботы</footer>
+      </div>
+    )
+  }
+  return <AccountApp />
+}
+
+function AccountApp() {
   const [account, setAccount] = useState<Account | null | undefined>(undefined)
   const [loadError, setLoadError] = useState('')
   const [attempt, setAttempt] = useState(0)
@@ -49,7 +79,7 @@ export default function App() {
   }
 
   return (
-    <div className="page">
+    <div className={calendarRoute() ? 'page page--calendar' : 'page'}>
       <header className="header">
         <a className="brand" href="/" aria-label="Дети Марии — главная">
           <img src={logo} alt="" width="162" height="32" />
@@ -134,12 +164,22 @@ export default function App() {
               }}
             />
           </div>
+        ) : calendarRoute() ? (
+          <CalendarPage key={account.id} onSessionExpired={expired} />
         ) : (
-          <ProfileForm
-            key={account.id}
-            email={account.email}
-            onSessionExpired={expired}
-          />
+          <>
+            <nav className="cal-section-nav" aria-label="Личный кабинет">
+              <a href="/" aria-current="page">
+                Мой профиль
+              </a>
+              <a href="/calendar">Календарь событий</a>
+            </nav>
+            <ProfileForm
+              key={account.id}
+              email={account.email}
+              onSessionExpired={expired}
+            />
+          </>
         )}
       </main>
       <footer>Дети Марии · Вместе создаём пространство заботы</footer>
