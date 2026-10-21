@@ -19,6 +19,17 @@ spring:
     enabled: true
     default-schema: public
     clean-disabled: true
+  modulith:
+    runtime:
+      verification-enabled: true
+    events:
+      jdbc:
+        schema: public
+        schema-initialization:
+          enabled: false
+      completion-mode: update
+      # The Compose deployment runs one backend instance; revisit before scaling out.
+      republish-outstanding-events-on-restart: true
   mvc:
     problemdetails:
       enabled: true

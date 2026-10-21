@@ -51,7 +51,7 @@ class PlatformIntegrationTests @Autowired constructor(
             String::class.java,
         )
         assertThat(schemas).contains(
-            "identity", "volunteers", "onboarding", "opportunities",
+            "identity", "volunteers", "onboarding", "learning", "opportunities",
             "participation", "coordination", "notifications",
         )
         assertThat(jdbc.queryForObject(

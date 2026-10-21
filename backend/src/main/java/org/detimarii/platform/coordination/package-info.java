@@ -1,5 +1,5 @@
 @org.springframework.modulith.ApplicationModule(
     displayName = "Сопровождение волонтёров",
-    allowedDependencies = {"volunteers", "onboarding", "opportunities", "participation"}
+    allowedDependencies = {"volunteers", "onboarding", "learning", "opportunities", "participation"}
 )
 package org.detimarii.platform.coordination;
