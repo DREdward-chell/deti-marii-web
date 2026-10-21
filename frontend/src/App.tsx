@@ -8,6 +8,7 @@ import { Button } from './shared/ui/Button'
 import { Card } from './shared/ui/Card'
 import { Chip } from './shared/ui/Chip'
 import { Journey } from './shared/ui/Journey'
+import { ThemeToggle } from './shared/ui/ThemeToggle'
 
 export default function App() {
   const [account, setAccount] = useState<Account | null | undefined>(undefined)
@@ -57,6 +58,7 @@ export default function App() {
         </a>
         <div className="header-actions">
           <Chip tone="muted">Прототип</Chip>
+          <ThemeToggle />
           {account && (
             <Button
               variant="quiet"

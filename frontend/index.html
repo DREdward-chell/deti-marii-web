@@ -9,6 +9,23 @@
       content="Пространство волонтёров фонда «Дети Марии»."
     />
     <title>Дети Марии — пространство волонтёров</title>
+    <script>
+      // Тема до запуска React, чтобы страница не мигала. Логика — как в shared/ui/theme.ts.
+      try {
+        var saved = localStorage.getItem('dm-theme')
+        var theme =
+          saved === 'light' || saved === 'dark'
+            ? saved
+            : matchMedia('(prefers-color-scheme: dark)').matches
+              ? 'dark'
+              : 'light'
+        document.documentElement.dataset.theme = theme
+        if (theme === 'dark')
+          document
+            .querySelector('meta[name="theme-color"]')
+            .setAttribute('content', '#131519')
+      } catch (error) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>
