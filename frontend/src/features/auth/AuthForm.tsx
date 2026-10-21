@@ -44,7 +44,12 @@ export function AuthForm({ onLogin }: { onLogin: (account: Account) => void }) {
 
   return (
     <Card tone="raised" aria-labelledby="auth-heading">
-      <div className="mode-switch" aria-label="Вход или регистрация">
+      <div
+        className="mode-switch"
+        data-mode={mode}
+        aria-label="Вход или регистрация"
+      >
+        <span className="mode-switch-indicator" aria-hidden="true" />
         <button
           type="button"
           aria-pressed={mode === 'login'}
@@ -72,14 +77,16 @@ export function AuthForm({ onLogin }: { onLogin: (account: Account) => void }) {
           Регистрация
         </button>
       </div>
-      <h2 id="auth-heading">
-        {mode === 'login' ? 'Рады видеть вас снова' : 'Давайте познакомимся'}
-      </h2>
-      <p className="muted">
-        {mode === 'login'
-          ? 'Войдите, чтобы открыть свою анкету.'
-          : 'Создайте аккаунт, а затем расскажите немного о себе.'}
-      </p>
+      <div key={mode} className="swap-in">
+        <h2 id="auth-heading">
+          {mode === 'login' ? 'Рады видеть вас снова' : 'Давайте познакомимся'}
+        </h2>
+        <p className="muted">
+          {mode === 'login'
+            ? 'Войдите, чтобы открыть свою анкету.'
+            : 'Создайте аккаунт, а затем расскажите немного о себе.'}
+        </p>
+      </div>
       <form onSubmit={(event) => void submit(event)}>
         <fieldset disabled={busy}>
           <label htmlFor="email">Email</label>
@@ -122,8 +129,13 @@ export function AuthForm({ onLogin }: { onLogin: (account: Account) => void }) {
                 ? 'Не меньше 8 символов.'
                 : 'Используйте пароль, который указали при регистрации.')}
           </p>
-          {mode === 'register' && (
-            <>
+          {/* Поле остаётся в разметке, чтобы плавно раскрываться; при входе оно отключено и недоступно. */}
+          <div
+            className="reveal"
+            data-open={mode === 'register'}
+            inert={mode !== 'register'}
+          >
+            <div className="reveal-inner">
               <label htmlFor="confirmation">Повторите пароль</label>
               <input
                 id="confirmation"
@@ -131,12 +143,13 @@ export function AuthForm({ onLogin }: { onLogin: (account: Account) => void }) {
                 type="password"
                 autoComplete="new-password"
                 required
+                disabled={mode !== 'register'}
                 maxLength={128}
                 value={confirmation}
                 onChange={(event) => setConfirmation(event.target.value)}
               />
-            </>
-          )}
+            </div>
+          </div>
           {notice && (
             <p className="notice" role="status">
               {notice}

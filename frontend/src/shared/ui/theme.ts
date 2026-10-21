@@ -59,6 +59,8 @@ export function useTheme(): [Theme, (theme: Theme) => void] {
     } catch {
       // Без доступа к хранилищу тема всё равно переключится до перезагрузки.
     }
+    // Сразу, а не в эффекте: анимация смены темы снимает новый кадр синхронно.
+    document.documentElement.dataset.theme = next
     setTheme(next)
   }
 

@@ -96,7 +96,7 @@ export default function App() {
             Открываем пространство волонтёров…
           </p>
         ) : account === null ? (
-          <div className="welcome-layout">
+          <div className="welcome-layout appear">
             <section className="welcome-copy">
               <p className="eyebrow">Помощь начинается со знакомства</p>
               <h1>

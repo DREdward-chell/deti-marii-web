@@ -107,7 +107,7 @@ export function ProfileForm({
   return (
     <Card
       tone="raised"
-      className="profile-card"
+      className="profile-card appear"
       aria-labelledby="profile-heading"
     >
       <p className="eyebrow">Ваша анкета</p>
