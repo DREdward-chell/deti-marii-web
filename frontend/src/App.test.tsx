@@ -43,6 +43,20 @@ function mockApi(
         return response({ account: signedIn ? account : null })
       if (url === '/api/v1/auth/csrf')
         return response({ headerName: 'X-CSRF-TOKEN', token: 'fresh-token' })
+      if (url === '/api/v1/onboarding/me/clearance')
+        return response({
+          paperwork: { status: 'NOT_CONFIRMED', message: '', updatedAt: null },
+          admissions: [],
+        })
+      if (url === '/api/v1/onboarding/me')
+        return response({
+          status: 'NEW',
+          message: '',
+          nextStep: '',
+          nextStepOwner: null,
+          nextStepDate: null,
+          updatedAt: null,
+        })
       if (!init?.method && url === '/api/v1/volunteers/me') {
         if (profileUnavailable)
           return response({ detail: 'Временная ошибка загрузки.' }, 500)

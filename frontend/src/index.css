@@ -1538,3 +1538,458 @@ main:has(> .questionnaire-view) > .notice {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ===== вход сотрудника по коду из письма ===== */
+.code-eyebrow,
+.coordinator-eyebrow {
+  justify-self: start;
+  display: inline-block;
+  margin: 0 0 12px;
+  padding: 7px 16px;
+  border-radius: var(--radius-pill);
+  background: var(--tint-sun);
+  color: var(--color-info-ink);
+  font-size: 14px;
+  font-weight: 500;
+}
+.code-card h2 {
+  margin-top: 0;
+}
+.code-input {
+  min-height: 64px;
+  border-radius: 40px;
+  text-align: center;
+  font-size: 28px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.4em;
+  padding-left: calc(16px + 0.4em);
+}
+.code-input::placeholder {
+  letter-spacing: 0.4em;
+  opacity: 0.5;
+}
+.code-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+/* ===== переключатель разделов: координатор / волонтёр ===== */
+.workspace-tabs {
+  display: inline-flex;
+  gap: 4px;
+  margin-bottom: 28px;
+  padding: 4px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+}
+.workspace-tabs button {
+  padding: 10px 20px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--color-muted);
+  font-size: 15px;
+  font-weight: 500;
+  transition:
+    background-color var(--duration-base) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+}
+.workspace-tabs button:hover {
+  color: var(--color-text);
+}
+.workspace-tabs button[aria-pressed='true'] {
+  background: var(--color-highlight);
+  color: var(--color-on-highlight);
+  box-shadow: 0 1px 3px rgb(17 20 25 / 12%);
+}
+
+/* ===== кабинет координатора ===== */
+/* те же тёплые «бумажные» тона, что и у анкеты волонтёра */
+.coordinator {
+  --warm-card: #f6f0e6;
+  --warm-border: #e2d6c3;
+  --warm-hover: #c4b294;
+  display: grid;
+  gap: 20px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+:root[data-theme='dark'] .coordinator {
+  --warm-card: #24221e;
+  --warm-border: #3d3831;
+  --warm-hover: #6b6152;
+}
+.coordinator-header {
+  display: grid;
+}
+.coordinator-header h1 {
+  font-size: clamp(32px, 4.5vw, 48px);
+  font-weight: 500;
+  letter-spacing: -0.025em;
+}
+.coordinator h2 {
+  margin-top: 0;
+  font-weight: 500;
+}
+.coordinator h3 {
+  margin: 0 0 4px;
+  font-size: 18px;
+  font-weight: 600;
+}
+.coordinator .back-link {
+  justify-self: start;
+}
+.coordinator input,
+.coordinator select,
+.coordinator .textarea {
+  border: 1px solid var(--warm-border);
+}
+.coordinator input,
+.coordinator select {
+  min-height: 52px;
+  padding: 12px 20px;
+  border-radius: 40px;
+}
+.coordinator .textarea {
+  padding: 14px 20px 32px;
+  border-radius: var(--radius-inner);
+}
+.coordinator input:hover,
+.coordinator select:hover,
+.coordinator .textarea:hover {
+  border-color: var(--warm-hover);
+}
+.role-catalog {
+  display: grid;
+  justify-items: start;
+  gap: 16px;
+}
+.role-catalog > .card {
+  justify-self: stretch;
+}
+
+/* поиск и фильтр по ритму */
+.directory-filters {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 240px auto;
+  align-items: end;
+  gap: 16px;
+  padding: 20px 24px;
+  border-radius: var(--radius-card);
+  background: var(--warm-card);
+}
+.directory-filters label {
+  margin-top: 0;
+}
+.directory-filters .btn {
+  min-height: 52px;
+}
+.directory-count {
+  margin: 4px 0 0;
+}
+.coordinator-message {
+  display: grid;
+  justify-items: start;
+  gap: 12px;
+}
+.coordinator-message p {
+  margin: 0;
+}
+
+/* список анкет: строка — карточка с инициалом */
+.volunteer-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.volunteer-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  padding: 14px 20px;
+  border: 1px solid var(--warm-border);
+  border-radius: var(--radius-inner);
+  background: var(--color-raised);
+  color: var(--color-text);
+  text-align: left;
+  transition:
+    border-color var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-base) var(--ease-out);
+}
+.volunteer-row:hover {
+  border-color: var(--warm-hover);
+  box-shadow: var(--shadow-raised);
+  transform: translateY(-1px);
+}
+.volunteer-row:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 3px;
+}
+.volunteer-avatar {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--tint-sun);
+  color: var(--color-text);
+  font-size: 19px;
+  font-weight: 500;
+}
+.volunteer-list li:nth-child(4n + 2) .volunteer-avatar {
+  background: var(--tint-sky);
+}
+.volunteer-list li:nth-child(4n + 3) .volunteer-avatar {
+  background: var(--tint-berry);
+}
+.volunteer-list li:nth-child(4n + 4) .volunteer-avatar {
+  background: var(--tint-leaf);
+}
+.volunteer-row-name {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.volunteer-row-name strong {
+  font-size: 16px;
+  font-weight: 600;
+}
+.volunteer-row-name .muted {
+  margin: 0;
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.volunteer-row-rhythm {
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  background: var(--warm-card);
+  font-size: 14px;
+  white-space: nowrap;
+}
+.volunteer-row-date {
+  font-size: 14px;
+  white-space: nowrap;
+}
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  color: var(--color-muted);
+  font-size: 15px;
+}
+
+/* карточка волонтёра, рассмотрение и допуски */
+.volunteer-details {
+  display: grid;
+  gap: 24px;
+}
+.volunteer-card-head {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 12px;
+}
+.volunteer-card-head .volunteer-avatar {
+  width: 64px;
+  height: 64px;
+  font-size: 28px;
+}
+.volunteer-card-head h2 {
+  margin: 0;
+  font-size: 28px;
+}
+.volunteer-card-head .muted {
+  margin: 4px 0 0;
+  font-size: 14px;
+}
+.volunteer-facts {
+  display: grid;
+  grid-template-columns: 180px minmax(0, 1fr);
+  margin: 0;
+}
+.volunteer-facts dt,
+.volunteer-facts dd {
+  margin: 0;
+  padding: 14px 0;
+  border-top: 1px solid var(--color-line);
+}
+.volunteer-facts dt {
+  color: var(--color-muted);
+  font-size: 14px;
+}
+.volunteer-facts dd {
+  overflow-wrap: anywhere;
+}
+.preserve-lines {
+  white-space: pre-line;
+}
+.review-panel > .muted,
+.clearance-panel .muted {
+  margin-top: 0;
+}
+.review-panel .btn[type='submit'],
+.clearance-panel .btn[type='submit'],
+.role-catalog .btn[type='submit'] {
+  margin-top: 24px;
+}
+/* внутренняя заметка видна только координаторам — выделяем пунктиром */
+.internal-note {
+  margin-top: 22px;
+  padding: 2px 18px 18px;
+  border: 1px dashed var(--warm-hover);
+  border-radius: var(--radius-inner);
+  background: var(--warm-card);
+}
+.internal-note .field-hint {
+  margin: 0 0 8px;
+}
+.admission-section {
+  margin-top: 28px;
+  padding-top: 24px;
+  border-top: 1px solid var(--color-line);
+}
+.review-history {
+  margin-top: 24px;
+  border-top: 1px solid var(--color-line);
+}
+.review-history summary {
+  padding: 16px 0 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.review-history ol {
+  display: grid;
+  gap: 10px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.review-history li {
+  padding: 12px 16px;
+  border-radius: var(--radius-inner);
+  background: var(--warm-card);
+}
+.review-history li p {
+  margin: 4px 0;
+}
+
+/* ===== волонтёру: следующий шаг и допуски в личном кабинете ===== */
+.account-main .next-step-card,
+.account-main .my-clearance {
+  display: grid;
+  justify-self: stretch;
+  justify-items: start;
+  gap: 4px;
+  margin: 8px 0 24px;
+  box-shadow: none;
+}
+.account-main .next-step-card {
+  background: var(--tint-sun);
+}
+.account-main .my-clearance {
+  margin-top: 28px;
+  background: var(--color-surface);
+}
+.next-step-card h2,
+.my-clearance h2 {
+  margin: 0 0 8px;
+  font-weight: 500;
+}
+.next-step-card .eyebrow {
+  margin-bottom: 4px;
+}
+.review-status {
+  margin: 0;
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  background: var(--color-raised);
+  font-size: 14px;
+  font-weight: 600;
+}
+.next-step-card .preserve-lines,
+.my-clearance .preserve-lines {
+  margin: 8px 0;
+  line-height: 1.6;
+}
+.next-step-summary {
+  justify-self: stretch;
+  margin: 4px 0 8px;
+  padding: 14px 18px;
+  border-radius: var(--radius-inner);
+  background: var(--color-raised);
+}
+.next-step-summary h3 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+}
+.next-step-summary p {
+  margin: 4px 0 0;
+  color: var(--color-muted);
+  font-size: 14px;
+}
+.my-clearance h3 {
+  margin: 12px 0 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+.admission-list {
+  justify-self: stretch;
+  display: grid;
+  gap: 10px;
+  margin: 8px 0;
+  padding: 0;
+  list-style: none;
+}
+.admission-list li {
+  padding: 12px 16px;
+  border-radius: var(--radius-inner);
+  background: var(--color-raised);
+}
+.admission-list h4 {
+  margin: 0 0 6px;
+  font-size: 15px;
+}
+.admission-list .review-status {
+  display: inline-block;
+  background: var(--color-surface);
+}
+
+@media (max-width: 700px) {
+  .directory-filters {
+    grid-template-columns: 1fr;
+  }
+  .volunteer-row {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  .volunteer-row-rhythm,
+  .volunteer-row-date {
+    grid-column: 2;
+    justify-self: start;
+  }
+  .volunteer-facts {
+    grid-template-columns: 1fr;
+  }
+  .volunteer-facts dd {
+    padding-top: 0;
+    border-top: 0;
+  }
+  .workspace-tabs {
+    display: flex;
+  }
+  .workspace-tabs button {
+    flex: 1;
+    padding-inline: 12px;
+  }
+}

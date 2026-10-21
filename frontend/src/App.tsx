@@ -1,10 +1,16 @@
 import { useCallback, useEffect, useState } from 'react'
 import { AccountPage } from './features/account/AccountPage'
 import { AuthForm } from './features/auth/AuthForm'
+import { CoordinatorWorkspace } from './features/coordination/CoordinatorWorkspace'
 import { ProfileForm } from './features/profile/ProfileForm'
 import logo from './assets/logo.svg'
-import { getSession, logout, type Account } from './shared/api/auth'
-import { errorMessage } from './shared/api/client'
+import {
+  getSession,
+  logout,
+  type Account,
+  type EmailVerification,
+} from './shared/api/auth'
+import { ApiError, errorMessage } from './shared/api/client'
 import { Button } from './shared/ui/Button'
 import { Card } from './shared/ui/Card'
 import { Journey } from './shared/ui/Journey'
@@ -20,21 +26,38 @@ export default function App() {
   const [view, setView] = useState<'account' | 'questionnaire' | 'onboarding'>(
     'account',
   )
+  // Незавершённый вход сотрудника: пароль принят, ждём код из письма.
+  const [verification, setVerification] = useState<EmailVerification | null>(
+    null,
+  )
+  // У кого есть обе роли, выбирает раздел; координатор начинает со своего.
+  const [workspace, setWorkspace] = useState<'coordination' | 'volunteer'>(
+    'coordination',
+  )
 
   useEffect(() => {
     const controller = new AbortController()
     void getSession(controller.signal)
       .then((session) => {
-        if (!controller.signal.aborted) setAccount(session)
+        if (controller.signal.aborted) return
+        setAccount(session.account)
+        setVerification(session.verification)
       })
       .catch((error: unknown) => {
-        if (!controller.signal.aborted) setLoadError(errorMessage(error))
+        if (controller.signal.aborted) return
+        // Сессию отозвали до загрузки страницы — это не сбой, а повод войти заново.
+        if (error instanceof ApiError && error.status === 401) {
+          setAccount(null)
+          setVerification(null)
+          setNotice(errorMessage(error))
+        } else setLoadError(errorMessage(error))
       })
     return () => controller.abort()
   }, [attempt])
 
   const expired = useCallback(() => {
     setAccount(null)
+    setVerification(null)
     setView('account')
     setNotice(
       'Сессия завершилась. Войдите ещё раз. Несохранённые изменения не отправлены.',
@@ -47,8 +70,13 @@ export default function App() {
     try {
       await logout()
       setAccount(null)
+      setVerification(null)
       setView('account')
     } catch (error) {
+      if (error instanceof ApiError && error.status === 401) {
+        setAccount(null)
+        setVerification(null)
+      }
       setNotice(errorMessage(error))
     } finally {
       setSigningOut(false)
@@ -135,8 +163,11 @@ export default function App() {
               />
             </section>
             <AuthForm
+              initialVerification={verification}
               onLogin={(next, registered) => {
                 setAccount(next)
+                setVerification(null)
+                setWorkspace('coordination')
                 setView(registered ? 'onboarding' : 'account')
                 setNotice(
                   registered
@@ -146,16 +177,39 @@ export default function App() {
               }}
             />
           </div>
+        ) : account.roles.includes('COORDINATOR') &&
+          (workspace === 'coordination' ||
+            !account.roles.includes('VOLUNTEER')) ? (
+          <>
+            <WorkspaceTabs
+              account={account}
+              workspace={workspace}
+              onChange={setWorkspace}
+            />
+            <CoordinatorWorkspace key={account.id} onSessionExpired={expired} />
+          </>
+        ) : !account.roles.includes('VOLUNTEER') ? (
+          <p className="notice">
+            Для аккаунта пока нет доступных разделов. Обратитесь к
+            администратору.
+          </p>
         ) : view === 'account' ? (
-          <AccountPage
-            key={account.id}
-            account={account}
-            onOpenQuestionnaire={() => {
-              setNotice('')
-              setView('questionnaire')
-            }}
-            onSessionExpired={expired}
-          />
+          <>
+            <WorkspaceTabs
+              account={account}
+              workspace={workspace}
+              onChange={setWorkspace}
+            />
+            <AccountPage
+              key={account.id}
+              account={account}
+              onOpenQuestionnaire={() => {
+                setNotice('')
+                setView('questionnaire')
+              }}
+              onSessionExpired={expired}
+            />
+          </>
         ) : (
           <div className="questionnaire-view">
             {view === 'questionnaire' && (
@@ -186,5 +240,40 @@ export default function App() {
       </main>
       <footer>Дети Марии · Вместе создаём пространство заботы</footer>
     </div>
+  )
+}
+
+/** Переключатель разделов для аккаунта, у которого есть и роль координатора, и роль волонтёра. */
+function WorkspaceTabs({
+  account,
+  workspace,
+  onChange,
+}: {
+  account: Account
+  workspace: 'coordination' | 'volunteer'
+  onChange: (workspace: 'coordination' | 'volunteer') => void
+}) {
+  if (
+    !account.roles.includes('COORDINATOR') ||
+    !account.roles.includes('VOLUNTEER')
+  )
+    return null
+  return (
+    <nav className="workspace-tabs" aria-label="Раздел кабинета">
+      <button
+        type="button"
+        aria-pressed={workspace === 'coordination'}
+        onClick={() => onChange('coordination')}
+      >
+        Кабинет координатора
+      </button>
+      <button
+        type="button"
+        aria-pressed={workspace === 'volunteer'}
+        onClick={() => onChange('volunteer')}
+      >
+        Мой кабинет
+      </button>
+    </nav>
   )
 }

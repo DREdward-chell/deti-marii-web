@@ -30,6 +30,20 @@ function mockApi({
     vi.fn(async (url: string, init?: RequestInit) => {
       if (url === '/api/v1/auth/csrf')
         return json({ headerName: 'X-CSRF-TOKEN', token: 't' })
+      if (url === '/api/v1/onboarding/me')
+        return json({
+          status: 'NEW',
+          message: '',
+          nextStep: '',
+          nextStepOwner: null,
+          nextStepDate: null,
+          updatedAt: null,
+        })
+      if (url === '/api/v1/onboarding/me/clearance')
+        return json({
+          paperwork: { status: 'NOT_CONFIRMED', message: '', updatedAt: null },
+          admissions: [],
+        })
       if (url === '/api/v1/volunteers/me' && !init?.method)
         return hasProfile
           ? json(profile)
