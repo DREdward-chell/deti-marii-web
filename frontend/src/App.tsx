@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { AccountPage } from './features/account/AccountPage'
 import { AuthForm } from './features/auth/AuthForm'
 import { ProfileForm } from './features/profile/ProfileForm'
 import logo from './assets/logo.svg'
@@ -15,6 +16,7 @@ export default function App() {
   const [attempt, setAttempt] = useState(0)
   const [notice, setNotice] = useState('')
   const [signingOut, setSigningOut] = useState(false)
+  const [view, setView] = useState<'account' | 'questionnaire'>('account')
 
   useEffect(() => {
     const controller = new AbortController()
@@ -30,6 +32,7 @@ export default function App() {
 
   const expired = useCallback(() => {
     setAccount(null)
+    setView('account')
     setNotice(
       'Сессия завершилась. Войдите ещё раз. Несохранённые изменения не отправлены.',
     )
@@ -41,6 +44,7 @@ export default function App() {
     try {
       await logout()
       setAccount(null)
+      setView('account')
     } catch (error) {
       setNotice(errorMessage(error))
     } finally {
@@ -134,10 +138,27 @@ export default function App() {
               }}
             />
           </div>
+        ) : view === 'questionnaire' ? (
+          <div className="questionnaire-view">
+            <Button
+              variant="quiet"
+              size="sm"
+              className="back-link"
+              onClick={() => setView('account')}
+            >
+              Вернуться в личный кабинет
+            </Button>
+            <ProfileForm
+              key={account.id}
+              email={account.email}
+              onSessionExpired={expired}
+            />
+          </div>
         ) : (
-          <ProfileForm
+          <AccountPage
             key={account.id}
-            email={account.email}
+            account={account}
+            onOpenQuestionnaire={() => setView('questionnaire')}
             onSessionExpired={expired}
           />
         )}
