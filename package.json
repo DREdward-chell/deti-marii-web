@@ -1,0 +1,26 @@
+{
+  "name": "deti-marii-monorepo",
+  "version": "0.1.0",
+  "license": "MIT",
+  "private": true,
+  "workspaces": [
+    "frontend"
+  ],
+  "engines": {
+    "node": ">=22.23.1 <23",
+    "npm": ">=10"
+  },
+  "scripts": {
+    "dev": "npm run dev --workspace @deti-marii/frontend",
+    "build": "npm run build --workspace @deti-marii/frontend",
+    "lint": "npm run lint --workspace @deti-marii/frontend",
+    "test": "npm run test --workspace @deti-marii/frontend",
+    "typecheck": "npm run typecheck --workspace @deti-marii/frontend",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check": "npm run format:check && npm run lint && npm run typecheck && npm test && npm run build"
+  },
+  "devDependencies": {
+    "prettier": "3.9.10"
+  }
+}

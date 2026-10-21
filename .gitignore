@@ -1,0 +1,30 @@
+.idea/
+.vscode/*
+!.vscode/extensions.json
+.DS_Store
+Thumbs.db
+
+# Local research remains outside the initial commit.
+Draft/
+
+# Secrets and machine-specific configuration.
+.env
+.env.*
+!.env.example
+*.local
+*.log
+
+# Java / Kotlin / Gradle.
+.gradle/
+.kotlin/
+**/build/
+**/out/
+!**/gradle/wrapper/gradle-wrapper.jar
+
+# JavaScript / TypeScript.
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+playwright-report/
+test-results/

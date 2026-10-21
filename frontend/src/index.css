@@ -1,0 +1,143 @@
+:root {
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
+  color: #293e37;
+  background: #f7f5ee;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  min-width: 320px;
+}
+a {
+  color: inherit;
+}
+a:focus-visible {
+  outline: 3px solid #aa683d;
+  outline-offset: 6px;
+}
+.page {
+  min-height: 100svh;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 36px 40px;
+  display: flex;
+  flex-direction: column;
+}
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+.brand {
+  font-size: 26px;
+  font-weight: 700;
+  text-decoration: none;
+}
+.brand span {
+  display: block;
+  margin-top: 5px;
+  font-size: 12px;
+  font-weight: 400;
+  color: #596b62;
+}
+.preview-label {
+  border: 1px solid #c7d0c3;
+  border-radius: 50px;
+  padding: 7px 14px;
+  font-size: 12px;
+}
+main {
+  flex: 1;
+  padding: 100px 0 80px;
+  max-width: 760px;
+}
+.eyebrow {
+  color: #8a4f2c;
+  font-size: 13px;
+  font-weight: 600;
+}
+h1 {
+  font-size: clamp(36px, 7vw, 72px);
+  line-height: 1.08;
+  letter-spacing: -0.045em;
+  margin: 22px 0;
+  font-weight: 600;
+}
+.intro {
+  max-width: 570px;
+  color: #596b62;
+  font-size: 19px;
+  line-height: 1.65;
+}
+.journey {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 30px;
+  padding: 24px 0;
+  font-size: 14px;
+}
+.journey span + span::before {
+  content: '→';
+  display: inline-block;
+  margin-right: 30px;
+  color: #8a4f2c;
+}
+.connection {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 580px;
+  margin-top: 30px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #596b62;
+}
+.connection-dot {
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #8e9989;
+}
+.connection--connected .connection-dot {
+  background: #3e7852;
+}
+.connection--unavailable .connection-dot {
+  background: #aa683d;
+}
+footer {
+  color: #596b62;
+  font-size: 12px;
+  border-top: 1px solid #dce0d4;
+  padding-top: 20px;
+}
+@media (max-width: 600px) {
+  .page {
+    padding: 24px;
+  }
+  main {
+    padding-top: 70px;
+  }
+  .intro {
+    font-size: 17px;
+  }
+  .journey {
+    gap: 12px;
+  }
+  .journey span + span::before {
+    margin-right: 12px;
+  }
+}

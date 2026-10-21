@@ -1,0 +1,7 @@
+Draft/
+backend/
+node_modules/
+dist/
+coverage/
+package-lock.json
+.env

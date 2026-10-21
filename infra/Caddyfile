@@ -1,0 +1,22 @@
+{$SITE_ADDRESS} {
+    encode zstd gzip
+
+    handle /api/* {
+        reverse_proxy backend:8080
+    }
+
+    @health path /actuator/health /actuator/health/*
+    handle @health {
+        reverse_proxy backend:8080
+    }
+
+    handle /actuator/* {
+        respond 404
+    }
+
+    handle {
+        root * /srv
+        try_files {path} /index.html
+        file_server
+    }
+}

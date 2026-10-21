@@ -1,0 +1,5 @@
+# Expose only PostgreSQL when the JVM and Vite run on the host.
+services:
+  postgres:
+    ports:
+      - '127.0.0.1:${POSTGRES_PORT:-5432}:5432'
