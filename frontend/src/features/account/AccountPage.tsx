@@ -9,16 +9,24 @@ import { MyClearance } from '../onboarding/MyClearance'
 import { MyNextStep } from '../onboarding/MyNextStep'
 import { AccountPhoto } from './AccountPhoto'
 import { ProfileDetails } from './ProfileDetails'
+import {
+  AccountLearningCard,
+  type AccountLearning,
+} from './AccountLearningCard'
+import './account.css'
 
 /** Личный кабинет волонтёра: фото, данные анкеты с правкой на месте и календарь. */
 export function AccountPage({
   account,
   onOpenQuestionnaire,
   onSessionExpired,
+  learning,
 }: {
   account: Account
   onOpenQuestionnaire: () => void
   onSessionExpired: () => void
+  /** Supplied by the learning feature after checking current server access. */
+  learning?: AccountLearning
 }) {
   const [profile, setProfile] = useState<Profile | null | undefined>(undefined)
   const [loadError, setLoadError] = useState('')
@@ -66,10 +74,15 @@ export function AccountPage({
   const name = profile?.displayName || account.email.split('@')[0]
 
   return (
-    <div className="account appear">
-      <div className="account-photo-area">
-        <AccountPhoto accountId={account.id} name={name} />
-      </div>
+    <div className="account account--compact appear">
+      <aside className="account-sidebar" aria-label="Фото и события дня">
+        <div className="account-photo-area">
+          <AccountPhoto accountId={account.id} name={name} />
+        </div>
+        <div className="account-calendar-area">
+          <TodayCard onSessionExpired={onSessionExpired} />
+        </div>
+      </aside>
 
       <section className="account-main" aria-labelledby="account-heading">
         <header className="account-header">
@@ -81,7 +94,6 @@ export function AccountPage({
 
         {profile ? (
           <>
-            <MyNextStep onSessionExpired={onSessionExpired} />
             <ProfileDetails
               profile={profile}
               onSaved={setProfile}
@@ -91,7 +103,7 @@ export function AccountPage({
             <Button variant="secondary" size="sm" onClick={onOpenQuestionnaire}>
               Открыть анкету
             </Button>
-            <MyClearance onSessionExpired={onSessionExpired} />
+            <AccountLearningCard learning={learning} />
           </>
         ) : (
           <div className="account-empty">
@@ -104,9 +116,15 @@ export function AccountPage({
         )}
       </section>
 
-      <div className="account-calendar-area">
-        <TodayCard onSessionExpired={onSessionExpired} />
-      </div>
+      {profile && (
+        <div className="account-followup">
+          <MyNextStep onSessionExpired={onSessionExpired} />
+          <details className="account-clearance">
+            <summary>Документы и допуски</summary>
+            <MyClearance onSessionExpired={onSessionExpired} />
+          </details>
+        </div>
+      )}
     </div>
   )
 }

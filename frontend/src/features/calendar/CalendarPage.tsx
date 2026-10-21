@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ApiError, errorMessage } from '../../shared/api/client'
 import { Button } from '../../shared/ui/Button'
 import { CalendarIcon } from './CalendarIcon'
 import { Agenda, MonthGrid, TimeGrid } from './CalendarViews'
 import { EventDetails } from './EventDetails'
 import { apiCalendarRepository, createDemoRepository } from './repository'
+import { calendarApiEnabled, useCalendarRefresh } from './integration'
 import {
   addDays,
   canApply,
@@ -63,10 +64,7 @@ export function CalendarPage({
       (demo ? createDemoRepository() : apiCalendarRepository),
     [demo, injectedRepository],
   )
-  const enabled =
-    demo ||
-    !!injectedRepository ||
-    import.meta.env.VITE_CALENDAR_API_ENABLED === 'true'
+  const enabled = demo || !!injectedRepository || calendarApiEnabled()
   const [location, setLocation] = useState(readLocation)
   const [miniMonth, setMiniMonth] = useState(location.date)
   const [data, setData] = useState<CalendarData | null>(null)
@@ -80,6 +78,13 @@ export function CalendarPage({
   )
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [now, setNow] = useState(() => new Date())
+  const refresh = useCallback(() => {
+    setLoading(true)
+    setError('')
+    setData(null)
+    setAttempt((value) => value + 1)
+  }, [])
+  useCalendarRefresh(enabled && !demo, refresh)
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 60000)
     const pop = () => {
@@ -99,7 +104,11 @@ export function CalendarPage({
     void repository
       .load(controller.signal)
       .then((next) => {
-        if (!controller.signal.aborted) setData(next)
+        if (!controller.signal.aborted)
+          setData({
+            ...next,
+            events: next.access === 'restricted' ? [] : next.events,
+          })
       })
       .catch((reason: unknown) => {
         if (controller.signal.aborted) return
@@ -118,12 +127,7 @@ export function CalendarPage({
       })
     return () => controller.abort()
   }, [attempt, enabled, repository, onSessionExpired])
-  function refresh() {
-    setLoading(true)
-    setError('')
-    setData(null)
-    setAttempt((value) => value + 1)
-  }
+
   function navigate(next: Partial<typeof location>, replace = false) {
     const result = { ...location, ...next }
     setLocation(result)

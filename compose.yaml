@@ -59,6 +59,8 @@ services:
     build:
       context: .
       dockerfile: frontend/Dockerfile
+      args:
+        VITE_CALENDAR_API_ENABLED: ${VITE_CALENDAR_API_ENABLED:-false}
     environment:
       SITE_ADDRESS: ${SITE_ADDRESS:-:80}
     ports:

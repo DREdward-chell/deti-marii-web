@@ -1,0 +1,212 @@
+/* Compact profile uses the existing brand tokens; TodayCard keeps its own design. */
+.account.account--compact {
+  grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
+  grid-template-areas: 'sidebar main' 'sidebar followup';
+  gap: 24px 40px;
+}
+.account-sidebar {
+  grid-area: sidebar;
+  display: grid;
+  align-content: start;
+  gap: 24px;
+  min-width: 0;
+}
+.account-sidebar > .account-photo-area,
+.account-sidebar > .account-calendar-area {
+  grid-area: auto;
+}
+.account--compact .account-main {
+  align-content: start;
+  gap: 16px;
+}
+.account--compact .account-header {
+  gap: 8px;
+  padding-bottom: 16px;
+}
+.account--compact .account-header h1 {
+  margin: 0;
+  font-size: clamp(28px, 3vw, 38px);
+  line-height: 1.15;
+  letter-spacing: -0.035em;
+}
+.account--compact .account-meta {
+  overflow-wrap: anywhere;
+}
+.account--compact .details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 24px;
+  margin: 0;
+}
+.account--compact .details-row {
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto 1fr;
+  align-items: start;
+  gap: 2px 8px;
+  min-width: 0;
+  padding: 10px 0;
+}
+.account--compact .details-label {
+  align-self: center;
+  font-size: 13px;
+}
+.account--compact .details-value {
+  grid-column: 1 / -1;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.account--compact .details-action {
+  grid-column: 2;
+  grid-row: 1;
+  align-items: center;
+  gap: 4px;
+}
+.account--compact .details-edit-button {
+  min-width: 44px;
+  min-height: 44px;
+  margin-block: -8px;
+  padding: 10px;
+}
+.details-edit-button svg {
+  width: 16px;
+  height: 16px;
+}
+.details-expand {
+  display: block;
+  border: 0;
+  padding: 8px 0;
+  min-height: 44px;
+  color: var(--color-brand-ink);
+  background: transparent;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font: inherit;
+  cursor: pointer;
+}
+.account--compact .details-row--editing {
+  grid-column: 1 / -1;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto;
+  margin: 4px 0;
+  padding: 18px;
+}
+.account-followup {
+  grid-area: followup;
+  display: grid;
+  align-content: start;
+  gap: 16px;
+  min-width: 0;
+}
+.account-followup .next-step-card,
+.account-followup .my-clearance {
+  display: grid;
+  justify-items: start;
+  gap: 10px;
+  margin: 0;
+  padding: 24px;
+  box-shadow: none;
+  background: var(--color-surface);
+}
+.account-followup h2 {
+  font-size: 22px;
+}
+.account-followup p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.account-clearance {
+  border-top: 1px solid var(--color-line);
+}
+.account-clearance > summary {
+  padding: 16px 0;
+  font-weight: 500;
+  cursor: pointer;
+}
+.account-learning {
+  width: 100%;
+  display: grid;
+  justify-items: start;
+  gap: 16px;
+  margin-top: 8px;
+  padding: 28px;
+  border-radius: var(--radius-card);
+  background: var(--tint-sky);
+}
+.account-learning .eyebrow,
+.account-learning h2,
+.account-learning p {
+  margin: 0;
+}
+.account-learning h2 {
+  font-size: clamp(23px, 2.5vw, 30px);
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+.account-learning-description {
+  max-width: 55ch;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.account-learning-progress {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+  font-size: 14px;
+}
+.account-learning progress {
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  overflow: hidden;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--color-raised);
+  color: var(--color-action);
+}
+.account-learning progress::-webkit-progress-bar {
+  background: var(--color-raised);
+}
+.account-learning progress::-webkit-progress-value {
+  background: var(--color-action);
+  border-radius: var(--radius-pill);
+}
+.account-learning progress::-moz-progress-bar {
+  background: var(--color-action);
+  border-radius: var(--radius-pill);
+}
+.account-learning .btn svg {
+  width: 26px;
+  height: 16px;
+}
+@media (max-width: 850px) {
+  .account.account--compact {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: 'photo' 'main' 'calendar' 'followup';
+    gap: 24px;
+  }
+  .account-sidebar {
+    display: contents;
+  }
+  .account-sidebar > .account-photo-area {
+    grid-area: photo;
+  }
+  .account-sidebar > .account-calendar-area {
+    grid-area: calendar;
+    max-width: none;
+  }
+}
+@media (max-width: 480px) {
+  .account--compact .details {
+    gap: 0 16px;
+  }
+  .account-learning {
+    padding: 24px 20px;
+  }
+  .account-learning .btn {
+    width: 100%;
+  }
+  .account--compact .account-photo {
+    grid-template-columns: 110px minmax(0, 1fr);
+    gap: 12px;
+  }
+}
