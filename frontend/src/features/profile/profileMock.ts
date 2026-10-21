@@ -8,14 +8,15 @@
 /** Пять направлений фонда из презентации (с. 2) и «пока не знаю». */
 export type Direction =
   'CREATIVITY' | 'EDUCATION' | 'INCLUSION' | 'MENTORING' | 'TRIPS' | 'UNSURE'
-export type ContactMethod = 'PHONE' | 'TELEGRAM' | 'EMAIL' | 'ANY'
+export type ContactMethod = 'PHONE' | 'TELEGRAM' | 'EMAIL'
 export type ParticipationFormat = 'STUDIO' | 'TRIPS' | 'INDIVIDUAL'
 
 export interface ProfileExtras {
   age: string
   experience: string
   directions: Direction[]
-  contactMethod: ContactMethod | ''
+  /** Можно выбрать несколько способов связи. */
+  contactMethods: ContactMethod[]
   formats: ParticipationFormat[]
   place: string
   /** «Периодически» — сервер знает только разово/регулярно, поэтому туда уходит REGULAR. */
@@ -27,7 +28,7 @@ export const emptyExtras: ProfileExtras = {
   age: '',
   experience: '',
   directions: [],
-  contactMethod: '',
+  contactMethods: [],
   formats: [],
   place: '',
   periodic: false,
@@ -75,7 +76,6 @@ export const contactOptions: Array<{ value: ContactMethod; title: string }> = [
   { value: 'PHONE', title: 'Звонок' },
   { value: 'TELEGRAM', title: 'Telegram' },
   { value: 'EMAIL', title: 'Email' },
-  { value: 'ANY', title: 'Любой' },
 ]
 
 export const formatOptions: Array<{
@@ -126,9 +126,12 @@ export function loadExtras(owner: string): ProfileExtras {
     const value = raw as Record<string, unknown>
     const text = (key: string) =>
       typeof value[key] === 'string' ? (value[key] as string) : ''
-    const contact = contactOptions.find(
-      (option) => option.value === value.contactMethod,
-    )
+    const contactValues = contactOptions.map((option) => option.value)
+    // Раньше хранился один способ (contactMethod), а «Любой» был отдельным вариантом.
+    const legacyContact =
+      value.contactMethod === 'ANY'
+        ? contactValues
+        : only([value.contactMethod], contactValues)
     return {
       age: text('age'),
       experience: text('experience'),
@@ -141,7 +144,9 @@ export function loadExtras(owner: string): ProfileExtras {
         value.formats,
         formatOptions.map((option) => option.value),
       ),
-      contactMethod: contact?.value ?? '',
+      contactMethods: Array.isArray(value.contactMethods)
+        ? only(value.contactMethods, contactValues)
+        : legacyContact,
       periodic: value.periodic === true,
       consent: value.consent === true,
     }
