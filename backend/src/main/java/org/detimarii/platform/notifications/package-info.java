@@ -1,5 +1,5 @@
 @org.springframework.modulith.ApplicationModule(
     displayName = "Уведомления",
-    allowedDependencies = {""}
+    allowedDependencies = {"identity"}
 )
 package org.detimarii.platform.notifications;

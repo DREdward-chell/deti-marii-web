@@ -4,6 +4,7 @@ import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.RowMapper
 import org.springframework.stereotype.Repository
 import java.util.UUID
+import org.detimarii.platform.volunteers.Regularity
 
 @Repository
 class ProfileRepository(private val jdbc: JdbcTemplate) {

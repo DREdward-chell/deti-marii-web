@@ -5,6 +5,8 @@ import { getMyProfile, type Profile } from '../../shared/api/profile'
 import { Button } from '../../shared/ui/Button'
 import { Card } from '../../shared/ui/Card'
 import { MonthCalendar } from '../../shared/ui/MonthCalendar'
+import { MyClearance } from '../onboarding/MyClearance'
+import { MyNextStep } from '../onboarding/MyNextStep'
 import { AccountPhoto } from './AccountPhoto'
 import { ProfileDetails } from './ProfileDetails'
 
@@ -88,6 +90,11 @@ export function AccountPage({
             <Button variant="secondary" size="sm" onClick={onOpenQuestionnaire}>
               Открыть анкету
             </Button>
+            {/* решение координатора по знакомству и оформление с допусками */}
+            <div className="account-progress">
+              <MyNextStep onSessionExpired={onSessionExpired} />
+              <MyClearance onSessionExpired={onSessionExpired} />
+            </div>
           </>
         ) : (
           <div className="account-empty">

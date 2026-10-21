@@ -1,15 +1,28 @@
 import { useState, type FormEvent } from 'react'
-import { login, register, type Account } from '../../shared/api/auth'
+import {
+  login,
+  register,
+  type Account,
+  type EmailVerification,
+} from '../../shared/api/auth'
 import { ApiError, errorMessage } from '../../shared/api/client'
 import { Button } from '../../shared/ui/Button'
 import { Card } from '../../shared/ui/Card'
+import { EmailCodeForm } from './EmailCodeForm'
 
-/** onLogin получает registered = true, если человек только что создал аккаунт. */
+/**
+ * Вход и регистрация. onLogin получает registered = true, если человек только что
+ * создал аккаунт. Сотрудникам после пароля сервер присылает код на почту — тогда
+ * форма переходит к вводу кода (initialVerification восстанавливает этот шаг).
+ */
 export function AuthForm({
   onLogin,
+  initialVerification,
 }: {
   onLogin: (account: Account, registered: boolean) => void
+  initialVerification: EmailVerification | null
 }) {
+  const [verification, setVerification] = useState(initialVerification)
   const [mode, setMode] = useState<'login' | 'register'>('login')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -39,7 +52,12 @@ export function AuthForm({
           'Аккаунт создан. Если вход прервётся, используйте указанные email и пароль.',
         )
       }
-      onLogin(await login(email.trim(), password), registering)
+      const result = await login(email.trim(), password)
+      if ('verificationRequired' in result) {
+        setPassword('')
+        setConfirmation('')
+        setVerification(result)
+      } else onLogin(result, registering)
     } catch (cause) {
       setError(errorMessage(cause))
       if (cause instanceof ApiError) setFields(cause.fields)
@@ -47,6 +65,19 @@ export function AuthForm({
       setBusy(false)
     }
   }
+
+  if (verification)
+    return (
+      <EmailCodeForm
+        initial={verification}
+        onLogin={(account) => onLogin(account, false)}
+        onRestart={() => {
+          setVerification(null)
+          setNotice('')
+          setMode('login')
+        }}
+      />
+    )
 
   return (
     <Card tone="raised" aria-labelledby="auth-heading">
