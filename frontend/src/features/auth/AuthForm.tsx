@@ -1,8 +1,21 @@
 import { useState, type FormEvent } from 'react'
-import { login, register, type Account } from '../../shared/api/auth'
+import {
+  login,
+  register,
+  type Account,
+  type EmailVerification,
+} from '../../shared/api/auth'
 import { ApiError, errorMessage } from '../../shared/api/client'
+import { EmailCodeForm } from './EmailCodeForm'
 
-export function AuthForm({ onLogin }: { onLogin: (account: Account) => void }) {
+export function AuthForm({
+  onLogin,
+  initialVerification,
+}: {
+  onLogin: (account: Account) => void
+  initialVerification: EmailVerification | null
+}) {
+  const [verification, setVerification] = useState(initialVerification)
   const [mode, setMode] = useState<'login' | 'register'>('login')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -31,7 +44,12 @@ export function AuthForm({ onLogin }: { onLogin: (account: Account) => void }) {
           'Аккаунт создан. Если вход прервётся, используйте указанные email и пароль.',
         )
       }
-      onLogin(await login(email.trim(), password))
+      const result = await login(email.trim(), password)
+      if ('verificationRequired' in result) {
+        setPassword('')
+        setConfirmation('')
+        setVerification(result)
+      } else onLogin(result)
     } catch (cause) {
       setError(errorMessage(cause))
       if (cause instanceof ApiError) setFields(cause.fields)
@@ -39,6 +57,19 @@ export function AuthForm({ onLogin }: { onLogin: (account: Account) => void }) {
       setBusy(false)
     }
   }
+
+  if (verification)
+    return (
+      <EmailCodeForm
+        initial={verification}
+        onLogin={onLogin}
+        onRestart={() => {
+          setVerification(null)
+          setNotice('')
+          setMode('login')
+        }}
+      />
+    )
 
   return (
     <section className="form-card" aria-labelledby="auth-heading">

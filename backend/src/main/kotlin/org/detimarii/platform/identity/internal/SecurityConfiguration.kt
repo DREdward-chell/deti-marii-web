@@ -11,7 +11,6 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.core.userdetails.UserDetailsService
-import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.password.DelegatingPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -26,6 +25,7 @@ import org.springframework.security.web.context.SecurityContextRepository
 import org.springframework.security.web.csrf.CsrfAuthenticationStrategy
 import org.springframework.security.web.csrf.CsrfTokenRepository
 import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository
+import org.springframework.security.web.access.intercept.AuthorizationFilter
 
 @Configuration(proxyBeanMethods = false)
 @EnableWebSecurity
@@ -36,18 +36,34 @@ class SecurityConfiguration {
         http: HttpSecurity,
         securityContexts: SecurityContextRepository,
         csrfTokens: CsrfTokenRepository,
+        accounts: AccountRepository,
     ): SecurityFilterChain {
         http
             .authorizeHttpRequests {
                 it.requestMatchers(HttpMethod.GET, "/api/v1/system/info", "/actuator/health", "/actuator/health/**",
                     "/api/v1/auth/csrf", "/api/v1/auth/session")
                     .permitAll()
-                    .requestMatchers(HttpMethod.POST, "/api/v1/auth/register", "/api/v1/auth/login").permitAll()
+                    .requestMatchers(HttpMethod.POST, "/api/v1/auth/register", "/api/v1/auth/login",
+                        "/api/v1/auth/email-code/verify", "/api/v1/auth/email-code/resend").permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/v1/volunteers/me").hasRole("VOLUNTEER")
                     .requestMatchers(HttpMethod.PUT, "/api/v1/volunteers/me").hasRole("VOLUNTEER")
+                    .requestMatchers(HttpMethod.GET, "/api/v1/onboarding/me").hasRole("VOLUNTEER")
+                    .requestMatchers(HttpMethod.GET, "/api/v1/onboarding/me/clearance").hasRole("VOLUNTEER")
+                    .requestMatchers(HttpMethod.GET, "/api/v1/coordination/volunteer-roles").hasRole("COORDINATOR")
+                    .requestMatchers(HttpMethod.POST, "/api/v1/coordination/volunteer-roles").hasRole("COORDINATOR")
+                    .requestMatchers(HttpMethod.PUT, "/api/v1/coordination/volunteer-roles/*").hasRole("COORDINATOR")
+                    .requestMatchers(HttpMethod.GET, "/api/v1/coordination/volunteers/*/paperwork", "/api/v1/coordination/volunteers/*/admissions/*")
+                    .hasRole("COORDINATOR")
+                    .requestMatchers(HttpMethod.PUT, "/api/v1/coordination/volunteers/*/paperwork", "/api/v1/coordination/volunteers/*/admissions/*")
+                    .hasRole("COORDINATOR")
+                    .requestMatchers(HttpMethod.GET, "/api/v1/coordination/volunteers/*/review").hasRole("COORDINATOR")
+                    .requestMatchers(HttpMethod.PUT, "/api/v1/coordination/volunteers/*/review").hasRole("COORDINATOR")
+                    .requestMatchers(HttpMethod.GET, "/api/v1/coordination/volunteers", "/api/v1/coordination/volunteers/*")
+                    .hasRole("COORDINATOR")
                     .anyRequest().denyAll()
             }
             .csrf { it.csrfTokenRepository(csrfTokens) }
+            .addFilterBefore(AccountSessionFilter(accounts), AuthorizationFilter::class.java)
             .securityContext { it.securityContextRepository(securityContexts).requireExplicitSave(true) }
             .requestCache { it.disable() }
             .httpBasic { it.disable() }
@@ -78,10 +94,8 @@ class SecurityConfiguration {
     @Bean
     fun userDetailsService(accounts: AccountRepository): UserDetailsService = UserDetailsService { email ->
         val account = accounts.findCredentials(normalizeEmail(email)) ?: throw UsernameNotFoundException("Invalid credentials")
-        User.withUsername(account.id.toString())
-            .password(account.passwordHash)
-            .roles(*accounts.roles(account.id).map { it.name }.toTypedArray())
-            .build()
+        val state = accounts.security(account.id) ?: throw UsernameNotFoundException("Invalid credentials")
+        SessionUser(account.id, account.passwordHash, state.account.roles, state.version)
     }
 
     @Bean

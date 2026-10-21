@@ -143,10 +143,9 @@ class AccountAndProfileIntegrationTests @Autowired constructor(
         assertThat(save(user.client, profile("   ")).response.status).isEqualTo(400)
         assertThat(save(user.client, profile() + ("skills" to "x".repeat(1001))).response.status).isEqualTo(400)
         jdbc.update("delete from identity.account_role where account_id = ?", user.id)
-        jdbc.update("insert into identity.account_role (account_id, role) values (?, 'COORDINATOR')", user.id)
-        val coordinatorOnly = signIn(user.email)
-        mvc.perform(get("/api/v1/volunteers/me").session(coordinatorOnly.session)).andExpect(status().isForbidden)
-        mvc.perform(get("/api/v1/coordination").session(coordinatorOnly.session)).andExpect(status().isForbidden)
+        val noRoles = signIn(user.email)
+        mvc.perform(get("/api/v1/volunteers/me").session(noRoles.session)).andExpect(status().isForbidden)
+        mvc.perform(get("/api/v1/coordination").session(noRoles.session)).andExpect(status().isForbidden)
     }
 
     @Test

@@ -5,8 +5,7 @@ import jakarta.validation.constraints.PositiveOrZero
 import jakarta.validation.constraints.Size
 import java.time.Instant
 import java.util.UUID
-
-enum class Regularity { UNSURE, ONE_OFF, REGULAR }
+import org.detimarii.platform.volunteers.Regularity
 
 data class SaveProfileRequest(
     @field:NotBlank(message = "Укажите, как к вам обращаться.")
