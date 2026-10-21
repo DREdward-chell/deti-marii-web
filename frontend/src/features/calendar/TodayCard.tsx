@@ -1,6 +1,11 @@
-import { Fragment, useEffect, useMemo, useState } from 'react'
+import { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 import { ApiError, errorMessage } from '../../shared/api/client'
 import { apiCalendarRepository, createDemoRepository } from './repository'
+import {
+  calendarApiEnabled,
+  calendarHref,
+  useCalendarRefresh,
+} from './integration'
 import {
   dayKey,
   directions,
@@ -12,16 +17,6 @@ import {
   type CalendarEvent,
   type CalendarRepository,
 } from './model'
-
-/** Пока сервер не отдаёт расписание, виджет и календарь показывают помеченный пример. */
-const apiEnabled = import.meta.env.VITE_CALENDAR_API_ENABLED === 'true'
-
-/** Ссылка на полный календарь, открытый на нужном дне в виде «День». */
-function calendarHref(day: string, demo: boolean) {
-  const params = new URLSearchParams({ date: day, view: 'day' })
-  if (demo) params.set('demo', '1')
-  return `/calendar?${params}`
-}
 
 type Moment = 'past' | 'now' | 'upcoming'
 
@@ -42,17 +37,25 @@ export function TodayCard({
   onSessionExpired: () => void
   repository?: CalendarRepository
 }) {
+  const apiEnabled = calendarApiEnabled()
   const demo = !injected && !apiEnabled
   const repository = useMemo(
     () =>
       injected ?? (apiEnabled ? apiCalendarRepository : createDemoRepository()),
-    [injected],
+    [injected, apiEnabled],
   )
   const [events, setEvents] = useState<CalendarEvent[] | null>(null)
   const [restricted, setRestricted] = useState(false)
   const [error, setError] = useState('')
   const [attempt, setAttempt] = useState(0)
   const [now, setNow] = useState(() => new Date())
+  const today = dayKey(now)
+  const refresh = useCallback(() => {
+    setError('')
+    setEvents(null)
+    setAttempt((value) => value + 1)
+  }, [])
+  useCalendarRefresh(!demo, refresh)
 
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 60000)
@@ -66,7 +69,7 @@ export function TodayCard({
       .then((data) => {
         if (controller.signal.aborted) return
         setRestricted(data.access === 'restricted')
-        setEvents(data.events)
+        setEvents(data.access === 'restricted' ? [] : data.events)
       })
       .catch((reason: unknown) => {
         if (controller.signal.aborted) return
@@ -82,9 +85,8 @@ export function TodayCard({
         setError(errorMessage(reason))
       })
     return () => controller.abort()
-  }, [repository, attempt, onSessionExpired])
+  }, [repository, attempt, onSessionExpired, today])
 
-  const today = dayKey(now)
   const todays = (events ?? [])
     .filter((event) => occursOn(event, today))
     .sort((a, b) => Date.parse(a.startsAt) - Date.parse(b.startsAt))
@@ -124,15 +126,7 @@ export function TodayCard({
       {error ? (
         <div className="today-state">
           <p role="alert">{error}</p>
-          <button
-            type="button"
-            className="today-retry"
-            onClick={() => {
-              setError('')
-              setEvents(null)
-              setAttempt((value) => value + 1)
-            }}
-          >
+          <button type="button" className="today-retry" onClick={refresh}>
             Повторить
           </button>
         </div>

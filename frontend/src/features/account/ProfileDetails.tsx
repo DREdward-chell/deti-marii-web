@@ -68,6 +68,7 @@ export function ProfileDetails({
   const [error, setError] = useState('')
   const [conflict, setConflict] = useState(false)
   const [saved, setSaved] = useState<Field | null>(null)
+  const [expanded, setExpanded] = useState<Partial<Record<Field, boolean>>>({})
   const control = useRef<HTMLInputElement & HTMLTextAreaElement>(null)
   const returnFocus = useRef<Field | null>(null)
 
@@ -133,6 +134,7 @@ export function ProfileDetails({
     <dl className="details">
       {fields.map((field) => {
         const value = shown(profile, field.key)
+        const long = value.length > 100
         if (editing === field.key)
           return (
             <div className="details-row details-row--editing" key={field.key}>
@@ -240,7 +242,31 @@ export function ProfileDetails({
           <div className="details-row" key={field.key}>
             <dt className="details-label">{field.label}</dt>
             <dd className="details-value">
-              {value || <span className="details-empty">Не указано</span>}
+              {value ? (
+                long && !expanded[field.key] ? (
+                  `${value.slice(0, 96).trimEnd()}…`
+                ) : (
+                  value
+                )
+              ) : (
+                <span className="details-empty">Не указано</span>
+              )}
+              {long && (
+                <button
+                  type="button"
+                  className="details-expand"
+                  aria-expanded={!!expanded[field.key]}
+                  aria-label={`${expanded[field.key] ? 'Свернуть' : 'Показать полностью'}: ${field.label}`}
+                  onClick={() =>
+                    setExpanded((previous) => ({
+                      ...previous,
+                      [field.key]: !previous[field.key],
+                    }))
+                  }
+                >
+                  {expanded[field.key] ? 'Свернуть' : 'Показать полностью'}
+                </button>
+              )}
             </dd>
             <dd className="details-action">
               {saved === field.key && (
@@ -252,11 +278,22 @@ export function ProfileDetails({
                 id={`edit-${field.key}`}
                 variant="quiet"
                 size="sm"
+                className="details-edit-button"
                 disabled={editing !== null}
                 aria-label={`Изменить: ${field.label}`}
                 onClick={() => open(field.key)}
               >
-                Изменить
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.7"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="m15 5 4 4M4 20l5-1L20 8a2.8 2.8 0 0 0-4-4L5 15l-1 5Z" />
+                </svg>
               </Button>
             </dd>
           </div>
