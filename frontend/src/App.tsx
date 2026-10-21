@@ -1,8 +1,13 @@
 import { useCallback, useEffect, useState } from 'react'
 import { AuthForm } from './features/auth/AuthForm'
 import { ProfileForm } from './features/profile/ProfileForm'
+import logo from './assets/logo.svg'
 import { getSession, logout, type Account } from './shared/api/auth'
 import { errorMessage } from './shared/api/client'
+import { Button } from './shared/ui/Button'
+import { Card } from './shared/ui/Card'
+import { Chip } from './shared/ui/Chip'
+import { Journey } from './shared/ui/Journey'
 
 export default function App() {
   const [account, setAccount] = useState<Account | null | undefined>(undefined)
@@ -47,18 +52,20 @@ export default function App() {
     <div className="page">
       <header className="header">
         <a className="brand" href="/" aria-label="Дети Марии — главная">
-          Дети Марии<span>Благотворительный фонд</span>
+          <img src={logo} alt="" width="162" height="32" />
+          <span>Пространство волонтёров</span>
         </a>
         <div className="header-actions">
-          <span className="preview-label">Прототип</span>
+          <Chip tone="muted">Прототип</Chip>
           {account && (
-            <button
-              className="text-button"
+            <Button
+              variant="quiet"
+              size="sm"
               disabled={signingOut}
               onClick={() => void signOut()}
             >
               {signingOut ? 'Выходим…' : 'Выйти'}
-            </button>
+            </Button>
           )}
         </div>
       </header>
@@ -69,19 +76,19 @@ export default function App() {
           </p>
         )}
         {loadError ? (
-          <section className="form-card">
+          <Card tone="raised">
             <h1>Не удалось открыть пространство</h1>
             <p role="alert">{loadError}</p>
-            <button
-              className="secondary-button"
+            <Button
+              variant="secondary"
               onClick={() => {
                 setLoadError('')
                 setAttempt((value) => value + 1)
               }}
             >
               Попробовать снова
-            </button>
-          </section>
+            </Button>
+          </Card>
         ) : account === undefined ? (
           <p className="notice" role="status">
             Открываем пространство волонтёров…
@@ -99,11 +106,26 @@ export default function App() {
                 Расскажите о себе, своих интересах и удобном ритме участия в
                 жизни фонда.
               </p>
-              <ol className="journey">
-                <li>Создайте аккаунт</li>
-                <li>Заполните анкету</li>
-                <li>Возвращайтесь и дополняйте</li>
-              </ol>
+              <Journey
+                label="Как начать"
+                steps={[
+                  {
+                    title: 'Создайте аккаунт',
+                    description: 'Нужны только email и пароль.',
+                    state: 'current',
+                  },
+                  {
+                    title: 'Заполните анкету',
+                    description: 'Интересы, навыки и удобный ритм участия.',
+                    state: 'upcoming',
+                  },
+                  {
+                    title: 'Возвращайтесь и дополняйте',
+                    description: 'Анкету можно менять в любой момент.',
+                    state: 'upcoming',
+                  },
+                ]}
+              />
             </section>
             <AuthForm
               onLogin={(next) => {

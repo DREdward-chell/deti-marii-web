@@ -1,6 +1,8 @@
 import { useState, type FormEvent } from 'react'
 import { login, register, type Account } from '../../shared/api/auth'
 import { ApiError, errorMessage } from '../../shared/api/client'
+import { Button } from '../../shared/ui/Button'
+import { Card } from '../../shared/ui/Card'
 
 export function AuthForm({ onLogin }: { onLogin: (account: Account) => void }) {
   const [mode, setMode] = useState<'login' | 'register'>('login')
@@ -41,7 +43,7 @@ export function AuthForm({ onLogin }: { onLogin: (account: Account) => void }) {
   }
 
   return (
-    <section className="form-card" aria-labelledby="auth-heading">
+    <Card tone="raised" aria-labelledby="auth-heading">
       <div className="mode-switch" aria-label="Вход или регистрация">
         <button
           type="button"
@@ -145,15 +147,15 @@ export function AuthForm({ onLogin }: { onLogin: (account: Account) => void }) {
               {error}
             </p>
           )}
-          <button className="primary-button" type="submit">
+          <Button className="form-submit" type="submit" block>
             {busy
               ? 'Подождите…'
               : mode === 'login'
                 ? 'Войти'
                 : 'Создать аккаунт'}
-          </button>
+          </Button>
         </fieldset>
       </form>
-    </section>
+    </Card>
   )
 }

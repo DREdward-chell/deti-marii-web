@@ -7,6 +7,8 @@ import {
   type ProfileDraft,
   type Regularity,
 } from '../../shared/api/profile'
+import { Button } from '../../shared/ui/Button'
+import { Card } from '../../shared/ui/Card'
 
 export function ProfileForm({
   email,
@@ -94,17 +96,18 @@ export function ProfileForm({
     )
   if (loadError)
     return (
-      <div className="form-card">
+      <Card tone="raised">
         <p role="alert">{loadError}</p>
-        <button className="secondary-button" onClick={reloadProfile}>
+        <Button variant="secondary" onClick={reloadProfile}>
           Попробовать снова
-        </button>
-      </div>
+        </Button>
+      </Card>
     )
 
   return (
-    <section
-      className="form-card profile-card"
+    <Card
+      tone="raised"
+      className="profile-card"
       aria-labelledby="profile-heading"
     >
       <p className="eyebrow">Ваша анкета</p>
@@ -231,13 +234,14 @@ export function ProfileForm({
                 Ваши правки остаются в форме. Загрузка актуальной анкеты заменит
                 их сохранёнными данными.
               </p>
-              <button
+              <Button
                 type="button"
-                className="secondary-button"
+                variant="secondary"
+                size="sm"
                 onClick={reloadProfile}
               >
                 Загрузить актуальную анкету
-              </button>
+              </Button>
             </div>
           )}
           {saved && (
@@ -245,11 +249,11 @@ export function ProfileForm({
               Анкета сохранена. Вы можете вернуться к ней в любой момент.
             </p>
           )}
-          <button className="primary-button" type="submit">
+          <Button className="form-submit" type="submit">
             {saving ? 'Сохраняем…' : 'Сохранить анкету'}
-          </button>
+          </Button>
         </fieldset>
       </form>
-    </section>
+    </Card>
   )
 }
