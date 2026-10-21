@@ -109,9 +109,7 @@ describe('volunteer account and own profile', () => {
       target: { value: 'a long test passphrase' },
     })
     fireEvent.click(screen.getByRole('button', { name: 'Создать аккаунт' }))
-    fireEvent.click(
-      await screen.findByRole('button', { name: 'Заполнить анкету' }),
-    )
+    // После регистрации сразу анкета, без возврата в кабинет.
     fireEvent.change(await screen.findByLabelText(/Как к вам обращаться/), {
       target: { value: 'Анна' },
     })
@@ -123,9 +121,19 @@ describe('volunteer account and own profile', () => {
       await screen.findByText(/Без согласия на обработку/),
     ).toBeInTheDocument()
     expect(api.writes).toHaveLength(2)
+    expect(
+      screen.queryByRole('button', { name: 'Вернуться в личный кабинет' }),
+    ).not.toBeInTheDocument()
     fireEvent.click(screen.getByRole('checkbox', { name: /Согласен/ }))
     fireEvent.click(screen.getByRole('button', { name: 'Сохранить анкету' }))
-    expect(await screen.findByText(/Анкета сохранена/)).toBeInTheDocument()
+    // После сохранения анкеты — личный кабинет.
+    expect(
+      await screen.findByRole('heading', { name: 'Анна' }),
+    ).toBeInTheDocument()
+    expect(screen.getByText(/Анкета сохранена/)).toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: 'Сохранить анкету' }),
+    ).not.toBeInTheDocument()
     expect(api.writes.map((request) => request.url)).toEqual([
       '/api/v1/auth/register',
       '/api/v1/auth/login',
@@ -138,6 +146,27 @@ describe('volunteer account and own profile', () => {
     })
     expect(api.writes[2].body).not.toHaveProperty('accountId')
     expect(api.writes[2].body).not.toHaveProperty('id')
+  })
+
+  it('opens the account page right after login, without the questionnaire', async () => {
+    const api = mockApi({ hasProfile: true })
+    render(<App />)
+    fireEvent.change(await screen.findByLabelText('Email'), {
+      target: { value: account.email },
+    })
+    fireEvent.change(screen.getByLabelText('Пароль'), {
+      target: { value: 'a long test passphrase' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Войти' }))
+    expect(
+      await screen.findByRole('heading', { name: 'Анна' }),
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: 'Сохранить анкету' }),
+    ).not.toBeInTheDocument()
+    expect(api.writes.map((request) => request.url)).toEqual([
+      '/api/v1/auth/login',
+    ])
   })
 
   it('keeps draft edits on conflict until the user explicitly reloads the profile', async () => {

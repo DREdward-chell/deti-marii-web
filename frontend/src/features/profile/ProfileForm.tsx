@@ -33,9 +33,12 @@ const privacyPolicyUrl = encodeURI(
 export function ProfileForm({
   email,
   onSessionExpired,
+  onSaved,
 }: {
   email: string
   onSessionExpired: () => void
+  /** Вызывается после успешного сохранения анкеты на сервере. */
+  onSaved?: () => void
 }) {
   const [draft, setDraft] = useState<ProfileDraft>({ ...emptyProfile })
   const [extras, setExtras] = useState<ProfileExtras>(() => loadExtras(email))
@@ -129,6 +132,7 @@ export function ProfileForm({
       setDraft(await saveMyProfile(draft))
       saveExtras(email, extras)
       setSaved(true)
+      onSaved?.()
     } catch (cause) {
       if (cause instanceof ApiError && cause.status === 401) {
         onSessionExpired()

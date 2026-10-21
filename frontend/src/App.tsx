@@ -16,7 +16,10 @@ export default function App() {
   const [attempt, setAttempt] = useState(0)
   const [notice, setNotice] = useState('')
   const [signingOut, setSigningOut] = useState(false)
-  const [view, setView] = useState<'account' | 'questionnaire'>('account')
+  // onboarding — анкета сразу после регистрации; questionnaire — анкета, открытая из кабинета
+  const [view, setView] = useState<'account' | 'questionnaire' | 'onboarding'>(
+    'account',
+  )
 
   useEffect(() => {
     const controller = new AbortController()
@@ -132,35 +135,53 @@ export default function App() {
               />
             </section>
             <AuthForm
-              onLogin={(next) => {
+              onLogin={(next, registered) => {
                 setAccount(next)
-                setNotice('')
+                setView(registered ? 'onboarding' : 'account')
+                setNotice(
+                  registered
+                    ? 'Аккаунт создан. Заполните анкету — после неё откроется личный кабинет.'
+                    : '',
+                )
               }}
             />
           </div>
-        ) : view === 'questionnaire' ? (
+        ) : view === 'account' ? (
+          <AccountPage
+            key={account.id}
+            account={account}
+            onOpenQuestionnaire={() => {
+              setNotice('')
+              setView('questionnaire')
+            }}
+            onSessionExpired={expired}
+          />
+        ) : (
           <div className="questionnaire-view">
-            <Button
-              variant="quiet"
-              size="sm"
-              className="back-link"
-              onClick={() => setView('account')}
-            >
-              Вернуться в личный кабинет
-            </Button>
+            {view === 'questionnaire' && (
+              <Button
+                variant="quiet"
+                size="sm"
+                className="back-link"
+                onClick={() => setView('account')}
+              >
+                Вернуться в личный кабинет
+              </Button>
+            )}
             <ProfileForm
               key={account.id}
               email={account.email}
               onSessionExpired={expired}
+              onSaved={() => {
+                setNotice(
+                  view === 'onboarding'
+                    ? 'Анкета сохранена. Это ваш личный кабинет: здесь можно поправить данные и следить за календарём.'
+                    : 'Анкета сохранена.',
+                )
+                setView('account')
+              }}
             />
           </div>
-        ) : (
-          <AccountPage
-            key={account.id}
-            account={account}
-            onOpenQuestionnaire={() => setView('questionnaire')}
-            onSessionExpired={expired}
-          />
         )}
       </main>
       <footer>Дети Марии · Вместе создаём пространство заботы</footer>

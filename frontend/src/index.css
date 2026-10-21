@@ -1343,6 +1343,11 @@ label.choice {
   max-width: 820px;
   margin: 0 auto;
 }
+/* подсказка над анкетой — той же ширины, что и форма */
+main:has(> .questionnaire-view) > .notice {
+  max-width: 820px;
+  margin: 0 auto 20px;
+}
 .back-link {
   justify-self: start;
   padding-left: 0;

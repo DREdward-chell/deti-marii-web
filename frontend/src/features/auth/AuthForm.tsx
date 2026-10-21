@@ -4,7 +4,12 @@ import { ApiError, errorMessage } from '../../shared/api/client'
 import { Button } from '../../shared/ui/Button'
 import { Card } from '../../shared/ui/Card'
 
-export function AuthForm({ onLogin }: { onLogin: (account: Account) => void }) {
+/** onLogin получает registered = true, если человек только что создал аккаунт. */
+export function AuthForm({
+  onLogin,
+}: {
+  onLogin: (account: Account, registered: boolean) => void
+}) {
   const [mode, setMode] = useState<'login' | 'register'>('login')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -25,15 +30,16 @@ export function AuthForm({ onLogin }: { onLogin: (account: Account) => void }) {
       return
     }
     setBusy(true)
+    const registering = mode === 'register'
     try {
-      if (mode === 'register') {
+      if (registering) {
         await register(email.trim(), password)
         setMode('login')
         setNotice(
           'Аккаунт создан. Если вход прервётся, используйте указанные email и пароль.',
         )
       }
-      onLogin(await login(email.trim(), password))
+      onLogin(await login(email.trim(), password), registering)
     } catch (cause) {
       setError(errorMessage(cause))
       if (cause instanceof ApiError) setFields(cause.fields)
