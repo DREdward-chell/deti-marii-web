@@ -5,6 +5,7 @@ import { getMyProfile, type Profile } from '../../shared/api/profile'
 import { Button } from '../../shared/ui/Button'
 import { Card } from '../../shared/ui/Card'
 import { TodayCard } from '../calendar/TodayCard'
+import { LearningCard } from '../learning/LearningCard'
 import { MyClearance } from '../onboarding/MyClearance'
 import { MyNextStep } from '../onboarding/MyNextStep'
 import { AccountPhoto } from './AccountPhoto'
@@ -81,6 +82,7 @@ export function AccountPage({
         </div>
         <div className="account-calendar-area">
           <TodayCard onSessionExpired={onSessionExpired} />
+          <LearningCard accountId={account.id} />
         </div>
       </aside>
 

@@ -3,6 +3,7 @@ import { AccountPage } from './features/account/AccountPage'
 import { AuthForm } from './features/auth/AuthForm'
 import { CalendarPage } from './features/calendar/CalendarPage'
 import { CoordinatorWorkspace } from './features/coordination/CoordinatorWorkspace'
+import { LearningPage } from './features/learning/LearningPage'
 import { ProfileForm } from './features/profile/ProfileForm'
 import logo from './assets/logo.svg'
 import {
@@ -18,6 +19,7 @@ import { Journey } from './shared/ui/Journey'
 import { ThemeToggle } from './shared/ui/ThemeToggle'
 
 const calendarRoute = () => window.location.pathname === '/calendar'
+const learningRoute = () => window.location.pathname === '/learning'
 const demoCalendar = () =>
   calendarRoute() &&
   new URLSearchParams(window.location.search).get('demo') === '1'
@@ -207,6 +209,12 @@ function AccountApp() {
           </div>
         ) : calendarRoute() ? (
           <CalendarPage key={account.id} onSessionExpired={expired} />
+        ) : learningRoute() ? (
+          <LearningPage
+            key={account.id}
+            accountId={account.id}
+            email={account.email}
+          />
         ) : account.roles.includes('COORDINATOR') &&
           (workspace === 'coordination' ||
             !account.roles.includes('VOLUNTEER')) ? (
