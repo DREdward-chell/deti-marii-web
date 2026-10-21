@@ -119,6 +119,12 @@ describe('volunteer account and own profile', () => {
       target: { value: 'Рисование' },
     })
     fireEvent.click(screen.getByRole('button', { name: 'Сохранить анкету' }))
+    expect(
+      await screen.findByText(/Без согласия на обработку/),
+    ).toBeInTheDocument()
+    expect(api.writes).toHaveLength(2)
+    fireEvent.click(screen.getByRole('checkbox', { name: /Согласен/ }))
+    fireEvent.click(screen.getByRole('button', { name: 'Сохранить анкету' }))
     expect(await screen.findByText(/Анкета сохранена/)).toBeInTheDocument()
     expect(api.writes.map((request) => request.url)).toEqual([
       '/api/v1/auth/register',
@@ -143,6 +149,7 @@ describe('volunteer account and own profile', () => {
     const name = await screen.findByLabelText(/Как к вам обращаться/)
     expect(name).toHaveValue('Анна')
     fireEvent.change(name, { target: { value: 'Моя правка' } })
+    fireEvent.click(screen.getByRole('checkbox', { name: /Согласен/ }))
     fireEvent.click(screen.getByRole('button', { name: 'Сохранить анкету' }))
     expect(await screen.findByRole('alert')).toHaveTextContent('другом окне')
     expect(name).toHaveValue('Моя правка')
@@ -161,9 +168,8 @@ describe('volunteer account and own profile', () => {
     fireEvent.click(
       await screen.findByRole('button', { name: 'Открыть анкету' }),
     )
-    fireEvent.click(
-      await screen.findByRole('button', { name: 'Сохранить анкету' }),
-    )
+    fireEvent.click(await screen.findByRole('checkbox', { name: /Согласен/ }))
+    fireEvent.click(screen.getByRole('button', { name: 'Сохранить анкету' }))
     expect(
       await screen.findByRole('button', { name: 'Войти' }),
     ).toBeInTheDocument()
