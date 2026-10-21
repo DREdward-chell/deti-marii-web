@@ -109,7 +109,7 @@ export function AuthForm({ onLogin }: { onLogin: (account: Account) => void }) {
               mode === 'register' ? 'new-password' : 'current-password'
             }
             required
-            minLength={mode === 'register' ? 15 : 1}
+            minLength={mode === 'register' ? 8 : 1}
             maxLength={128}
             value={password}
             onChange={(event) => setPassword(event.target.value)}
@@ -119,7 +119,7 @@ export function AuthForm({ onLogin }: { onLogin: (account: Account) => void }) {
           <p className="field-hint" id="password-help">
             {fields.password ||
               (mode === 'register'
-                ? 'От 15 до 128 символов. Можно использовать длинную фразу.'
+                ? 'Не меньше 8 символов.'
                 : 'Используйте пароль, который указали при регистрации.')}
           </p>
           {mode === 'register' && (
