@@ -1161,6 +1161,9 @@ textarea[aria-invalid='true'] {
 }
 .account-calendar-area {
   grid-area: calendar;
+  display: grid;
+  align-content: start;
+  gap: 20px;
   min-width: 0;
 }
 
