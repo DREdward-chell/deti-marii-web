@@ -23,6 +23,39 @@ describe('profile mock fields', () => {
     expect(ageError('300')).not.toBe('')
   })
 
+  it('keeps several contact methods and reads the old single choice', () => {
+    saveExtras('d@example.test', {
+      ...emptyExtras,
+      contactMethods: ['PHONE', 'TELEGRAM'],
+    })
+    expect(loadExtras('d@example.test').contactMethods).toEqual([
+      'PHONE',
+      'TELEGRAM',
+    ])
+
+    localStorage.setItem(
+      'dm-profile-mock:e@example.test',
+      '{"contactMethod":"TELEGRAM"}',
+    )
+    expect(loadExtras('e@example.test').contactMethods).toEqual(['TELEGRAM'])
+
+    localStorage.setItem(
+      'dm-profile-mock:f@example.test',
+      '{"contactMethod":"ANY"}',
+    )
+    expect(loadExtras('f@example.test').contactMethods).toEqual([
+      'PHONE',
+      'TELEGRAM',
+      'EMAIL',
+    ])
+
+    localStorage.setItem(
+      'dm-profile-mock:g@example.test',
+      '{"contactMethods":["EMAIL","ANY","FAX"]}',
+    )
+    expect(loadExtras('g@example.test').contactMethods).toEqual(['EMAIL'])
+  })
+
   it('stores fields per account and ignores broken data', () => {
     saveExtras('a@example.test', {
       ...emptyExtras,

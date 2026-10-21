@@ -108,7 +108,7 @@ export function ProfileForm({
       problems.displayName = 'Укажите, как к вам обращаться.'
     if (!isPhoneComplete(draft.phone))
       problems.phone = 'Допишите номер полностью или оставьте поле пустым.'
-    else if (extras.contactMethod === 'PHONE' && !draft.phone)
+    else if (extras.contactMethods.includes('PHONE') && !draft.phone)
       problems.phone = 'Чтобы мы могли позвонить, укажите телефон.'
     const age = ageError(extras.age)
     if (age) problems.age = age
@@ -251,16 +251,24 @@ export function ProfileForm({
                 <FieldError id="phone-error" message={fields.phone} />
               </div>
               <fieldset className="profile-choices">
-                <legend>Как с вами удобнее связаться?</legend>
+                <legend>
+                  Как с вами удобнее связаться?{' '}
+                  <span className="optional-label">можно несколько</span>
+                </legend>
                 <div className="profile-pills">
                   {contactOptions.map((option) => (
                     <Pill
                       key={option.value}
-                      type="radio"
-                      name="contactMethod"
-                      checked={extras.contactMethod === option.value}
+                      type="checkbox"
+                      name="contactMethods"
+                      checked={extras.contactMethods.includes(option.value)}
                       onChange={() =>
-                        changeExtras({ contactMethod: option.value })
+                        changeExtras({
+                          contactMethods: toggleValue(
+                            extras.contactMethods,
+                            option.value,
+                          ),
+                        })
                       }
                     >
                       {option.title}
