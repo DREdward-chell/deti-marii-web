@@ -4,7 +4,7 @@ import { ApiError, errorMessage } from '../../shared/api/client'
 import { getMyProfile, type Profile } from '../../shared/api/profile'
 import { Button } from '../../shared/ui/Button'
 import { Card } from '../../shared/ui/Card'
-import { MonthCalendar } from '../../shared/ui/MonthCalendar'
+import { TodayCard } from '../calendar/TodayCard'
 import { MyClearance } from '../onboarding/MyClearance'
 import { MyNextStep } from '../onboarding/MyNextStep'
 import { AccountPhoto } from './AccountPhoto'
@@ -104,9 +104,9 @@ export function AccountPage({
         )}
       </section>
 
-      <Card tone="plain" className="account-calendar-area">
-        <MonthCalendar />
-      </Card>
+      <div className="account-calendar-area">
+        <TodayCard onSessionExpired={onSessionExpired} />
+      </div>
     </div>
   )
 }

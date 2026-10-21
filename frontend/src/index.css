@@ -1161,7 +1161,269 @@ textarea[aria-invalid='true'] {
 }
 .account-calendar-area {
   grid-area: calendar;
-  padding: 20px;
+  min-width: 0;
+}
+
+/* ===== компонент: TodayCard — сегодняшний день на таймлайне ===== */
+/* вся карточка — ссылка на полный календарь: ссылка растянута на неё псевдоэлементом */
+.today-card {
+  --cal-creative-bg: var(--tint-orange);
+  --cal-creative-ink: var(--color-brand-ink);
+  --cal-community-bg: var(--tint-leaf);
+  --cal-community-ink: var(--color-success-ink);
+  --cal-learning-bg: var(--tint-blue);
+  --cal-learning-ink: var(--color-info-ink);
+  --cal-help-bg: var(--tint-sun);
+  --cal-help-ink: var(--color-waiting-ink);
+  position: relative;
+  display: grid;
+  gap: 16px;
+  padding: 22px 22px 18px;
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  transition:
+    box-shadow var(--duration-base) var(--ease-out),
+    transform var(--duration-base) var(--ease-out);
+}
+.today-card:hover {
+  box-shadow: var(--shadow-raised);
+  transform: translateY(-2px);
+}
+.today-card:has(.today-link:focus-visible) {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 3px;
+}
+.today-dir--creative {
+  --event-bg: var(--cal-creative-bg);
+  --event-ink: var(--cal-creative-ink);
+}
+.today-dir--community {
+  --event-bg: var(--cal-community-bg);
+  --event-ink: var(--cal-community-ink);
+}
+.today-dir--learning {
+  --event-bg: var(--cal-learning-bg);
+  --event-ink: var(--cal-learning-ink);
+}
+.today-dir--help {
+  --event-bg: var(--cal-help-bg);
+  --event-ink: var(--cal-help-ink);
+}
+.today-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.today-weekday {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 14px;
+}
+.today-weekday::first-letter {
+  text-transform: uppercase;
+}
+.today-head h2 {
+  margin: 2px 0 0;
+  font-size: 28px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+.today-demo {
+  padding: 3px 10px;
+  border: 1px dashed var(--color-line);
+  border-radius: var(--radius-pill);
+  color: var(--color-muted);
+  font-size: 12px;
+}
+.today-state {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 15px;
+  line-height: 1.5;
+}
+.today-state p {
+  margin: 0;
+}
+.today-next {
+  font-size: 14px;
+}
+.today-retry {
+  position: relative;
+  z-index: 1;
+  justify-self: start;
+  padding: 6px 14px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-pill);
+  background: var(--color-raised);
+  color: var(--color-text);
+  font-size: 14px;
+}
+.today-all-day {
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: var(--radius-field);
+  background: var(--event-bg);
+  color: var(--event-ink);
+  font-size: 14px;
+}
+.today-all-day span {
+  font-weight: 600;
+}
+
+/* таймлайн: время · точка на линии · событие */
+.today-timeline {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.today-event,
+.today-now {
+  position: relative;
+  display: grid;
+  grid-template-columns: 44px 14px minmax(0, 1fr);
+  column-gap: 10px;
+  padding-bottom: 16px;
+}
+.today-event::before {
+  content: '';
+  position: absolute;
+  top: 20px;
+  bottom: 0;
+  left: 60px;
+  width: 2px;
+  border-radius: 1px;
+  background: var(--color-line);
+}
+.today-timeline > :last-child {
+  padding-bottom: 0;
+}
+.today-timeline > :last-child::before {
+  display: none;
+}
+.today-time {
+  display: grid;
+  align-content: start;
+  font-size: 14px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.35;
+}
+.today-time-end {
+  color: var(--color-muted);
+  font-size: 12px;
+  font-weight: 400;
+}
+.today-dot {
+  position: relative;
+  width: 14px;
+  height: 14px;
+  margin-top: 3px;
+  border: 3px solid var(--event-ink);
+  border-radius: 50%;
+  background: var(--event-bg);
+}
+.today-body {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.today-body strong {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+.today-meta {
+  overflow: hidden;
+  color: var(--color-muted);
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.today-badge {
+  justify-self: start;
+  margin-top: 4px;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--color-raised);
+  color: var(--color-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+.today-badge--mine {
+  background: var(--event-bg);
+  color: var(--event-ink);
+}
+.today-badge--now {
+  background: var(--color-action);
+  color: var(--color-on-action);
+}
+.today-event[data-moment='past'] {
+  opacity: 0.55;
+}
+.today-event[data-moment='now'] .today-dot {
+  background: var(--event-ink);
+  box-shadow: 0 0 0 4px var(--event-bg);
+}
+.today-event[data-moment='now'] .today-body strong {
+  color: var(--event-ink);
+}
+.today-event[data-cancelled] .today-body strong {
+  text-decoration: line-through;
+}
+/* отметка текущего времени между событиями */
+.today-now {
+  grid-template-columns: 44px minmax(0, 1fr);
+  align-items: center;
+}
+.today-now .today-time {
+  color: var(--color-action);
+  font-size: 12px;
+}
+.today-now-line {
+  position: relative;
+  height: 2px;
+  margin-left: 7px;
+  border-radius: 1px;
+  background: var(--color-action);
+}
+.today-now-line::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -5px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--color-action);
+}
+.today-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  justify-self: start;
+  color: var(--color-text);
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.today-link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+.today-link:focus-visible {
+  outline: none;
+}
+.today-link span {
+  transition: transform var(--duration-base) var(--ease-spring);
+}
+.today-card:hover .today-link span {
+  transform: translateX(4px);
 }
 .account-photo {
   display: grid;
@@ -1351,89 +1613,6 @@ main:has(> .questionnaire-view) > .notice {
 .back-link {
   justify-self: start;
   padding-left: 0;
-}
-
-/* ===== компонент: MonthCalendar ===== */
-.calendar-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-.calendar-title {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-}
-.calendar-year {
-  color: var(--color-muted);
-  font-weight: 500;
-}
-.calendar-nav {
-  display: flex;
-  gap: 2px;
-}
-.calendar-nav button {
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  padding: 0;
-  border: 0;
-  border-radius: 50%;
-  background: transparent;
-  color: var(--color-text);
-  transition: background-color var(--duration-fast) var(--ease-out);
-}
-.calendar-nav button:hover {
-  background: var(--color-raised);
-}
-.calendar-nav svg {
-  width: 18px;
-  height: 18px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2.2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-.calendar-grid {
-  width: 100%;
-  border-collapse: collapse;
-  table-layout: fixed;
-  text-align: center;
-  font-variant-numeric: tabular-nums;
-}
-.calendar-grid th {
-  padding: 0 0 8px;
-  color: var(--color-muted);
-  font-size: 12px;
-  font-weight: 600;
-}
-.calendar-grid th:nth-child(n + 6) {
-  color: var(--color-brand-ink);
-}
-.calendar-grid td {
-  padding: 2px 0;
-}
-.calendar-day {
-  display: inline-grid;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  font-size: 15px;
-}
-.calendar-day[data-past] {
-  color: var(--color-muted);
-  opacity: 0.6;
-}
-.calendar-day[aria-current='date'] {
-  background: var(--color-action);
-  color: var(--color-on-action);
-  font-weight: 700;
 }
 
 @media (max-width: 850px) {

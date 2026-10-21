@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { AccountPage } from './features/account/AccountPage'
 import { AuthForm } from './features/auth/AuthForm'
+import { CalendarPage } from './features/calendar/CalendarPage'
 import { CoordinatorWorkspace } from './features/coordination/CoordinatorWorkspace'
 import { ProfileForm } from './features/profile/ProfileForm'
 import logo from './assets/logo.svg'
@@ -16,7 +17,34 @@ import { Card } from './shared/ui/Card'
 import { Journey } from './shared/ui/Journey'
 import { ThemeToggle } from './shared/ui/ThemeToggle'
 
+const calendarRoute = () => window.location.pathname === '/calendar'
+const demoCalendar = () =>
+  calendarRoute() &&
+  new URLSearchParams(window.location.search).get('demo') === '1'
+const leaveDemo = () => window.location.assign('/')
+
 export default function App() {
+  // Демо-календарь на вымышленных событиях открывается без входа и сервера.
+  if (demoCalendar())
+    return (
+      <div className="page page--calendar">
+        <header className="header">
+          <a className="brand" href="/" aria-label="Дети Марии — главная">
+            <img src={logo} alt="" width="162" height="32" />
+            <span>Пространство волонтёров</span>
+          </a>
+          <ThemeToggle />
+        </header>
+        <main>
+          <CalendarPage demo onSessionExpired={leaveDemo} />
+        </main>
+        <footer>Дети Марии · Вместе создаём пространство заботы</footer>
+      </div>
+    )
+  return <AccountApp />
+}
+
+function AccountApp() {
   const [account, setAccount] = useState<Account | null | undefined>(undefined)
   const [loadError, setLoadError] = useState('')
   const [attempt, setAttempt] = useState(0)
@@ -84,7 +112,7 @@ export default function App() {
   }
 
   return (
-    <div className="page">
+    <div className={calendarRoute() ? 'page page--calendar' : 'page'}>
       <header className="header">
         <a className="brand" href="/" aria-label="Дети Марии — главная">
           <img src={logo} alt="" width="162" height="32" />
@@ -177,6 +205,8 @@ export default function App() {
               }}
             />
           </div>
+        ) : calendarRoute() ? (
+          <CalendarPage key={account.id} onSessionExpired={expired} />
         ) : account.roles.includes('COORDINATOR') &&
           (workspace === 'coordination' ||
             !account.roles.includes('VOLUNTEER')) ? (
