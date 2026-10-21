@@ -1,4 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
+import { CourseWorkspace } from './features/learning/CourseWorkspace'
+import { LearningWorkspace } from './features/learning/LearningWorkspace'
+import { OpportunityWorkspace } from './features/opportunities/OpportunityWorkspace'
+import { OpportunityCatalog } from './features/opportunities/OpportunityCatalog'
 import { AuthForm } from './features/auth/AuthForm'
 import { ProfileForm } from './features/profile/ProfileForm'
 import {
@@ -16,12 +20,19 @@ export default function App() {
   const [attempt, setAttempt] = useState(0)
   const [notice, setNotice] = useState('')
   const [signingOut, setSigningOut] = useState(false)
+  const [workspaceNavigationBlocked, setWorkspaceNavigationBlocked] =
+    useState(false)
   const [verification, setVerification] = useState<EmailVerification | null>(
     null,
   )
-  const [workspace, setWorkspace] = useState<'coordination' | 'profile'>(
-    'coordination',
-  )
+  const [workspace, setWorkspace] = useState<
+    | 'coordination'
+    | 'profile'
+    | 'courses'
+    | 'learning'
+    | 'opportunities'
+    | 'catalog'
+  >('coordination')
 
   useEffect(() => {
     const controller = new AbortController()
@@ -80,7 +91,7 @@ export default function App() {
           {account && (
             <button
               className="text-button"
-              disabled={signingOut}
+              disabled={signingOut || workspaceNavigationBlocked}
               onClick={() => void signOut()}
             >
               {signingOut ? 'Выходим…' : 'Выйти'}
@@ -143,28 +154,91 @@ export default function App() {
           </div>
         ) : (
           <>
-            {account.roles.includes('COORDINATOR') &&
-              account.roles.includes('VOLUNTEER') && (
-                <nav className="workspace-tabs" aria-label="Раздел кабинета">
+            <nav className="workspace-tabs" aria-label="Раздел кабинета">
+              {account.roles.includes('COORDINATOR') && (
+                <>
                   <button
                     className="secondary-button"
                     aria-pressed={workspace === 'coordination'}
+                    disabled={workspaceNavigationBlocked}
                     onClick={() => setWorkspace('coordination')}
                   >
                     Кабинет координатора
                   </button>
                   <button
                     className="secondary-button"
-                    aria-pressed={workspace === 'profile'}
+                    aria-pressed={workspace === 'courses'}
+                    disabled={workspaceNavigationBlocked}
+                    onClick={() => setWorkspace('courses')}
+                  >
+                    Учебные маршруты
+                  </button>
+                  <button
+                    className="secondary-button"
+                    aria-pressed={workspace === 'opportunities'}
+                    disabled={workspaceNavigationBlocked}
+                    onClick={() => setWorkspace('opportunities')}
+                  >
+                    Возможности помощи
+                  </button>
+                </>
+              )}
+              {account.roles.includes('VOLUNTEER') && (
+                <>
+                  <button
+                    className="secondary-button"
+                    aria-pressed={
+                      workspace === 'profile' ||
+                      (workspace === 'coordination' &&
+                        !account.roles.includes('COORDINATOR'))
+                    }
+                    disabled={workspaceNavigationBlocked}
                     onClick={() => setWorkspace('profile')}
                   >
                     Моя анкета
                   </button>
-                </nav>
+                  <button
+                    className="secondary-button"
+                    aria-pressed={workspace === 'learning'}
+                    disabled={workspaceNavigationBlocked}
+                    onClick={() => setWorkspace('learning')}
+                  >
+                    Моё обучение
+                  </button>
+                  <button
+                    className="secondary-button"
+                    aria-pressed={workspace === 'catalog'}
+                    disabled={workspaceNavigationBlocked}
+                    onClick={() => setWorkspace('catalog')}
+                  >
+                    Найти дело
+                  </button>
+                </>
               )}
-            {account.roles.includes('COORDINATOR') &&
-            (workspace === 'coordination' ||
-              !account.roles.includes('VOLUNTEER')) ? (
+            </nav>
+            {workspace === 'opportunities' &&
+            account.roles.includes('COORDINATOR') ? (
+              <OpportunityWorkspace
+                key={account.id}
+                onSessionExpired={expired}
+                onNavigationBlocked={setWorkspaceNavigationBlocked}
+              />
+            ) : workspace === 'catalog' &&
+              account.roles.includes('VOLUNTEER') ? (
+              <OpportunityCatalog key={account.id} onSessionExpired={expired} />
+            ) : workspace === 'courses' &&
+              account.roles.includes('COORDINATOR') ? (
+              <CourseWorkspace
+                key={account.id}
+                onSessionExpired={expired}
+                onNavigationBlocked={setWorkspaceNavigationBlocked}
+              />
+            ) : workspace === 'learning' &&
+              account.roles.includes('VOLUNTEER') ? (
+              <LearningWorkspace key={account.id} onSessionExpired={expired} />
+            ) : account.roles.includes('COORDINATOR') &&
+              (workspace === 'coordination' ||
+                !account.roles.includes('VOLUNTEER')) ? (
               <CoordinatorWorkspace
                 key={account.id}
                 onSessionExpired={expired}

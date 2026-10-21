@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { ApiError, errorMessage } from '../../shared/api/client'
+import { VolunteerLearningProgress } from '../learning/VolunteerLearningProgress'
 import { ReviewPanel } from './ReviewPanel'
 import { ClearancePanel } from './ClearancePanel'
 import { RoleCatalogPanel } from './RoleCatalogPanel'
@@ -158,6 +159,11 @@ export function CoordinatorWorkspace({
             </article>
             <ReviewPanel
               key={card.id}
+              volunteerId={card.id}
+              onSessionExpired={onSessionExpired}
+            />
+            <VolunteerLearningProgress
+              key={`learning:${card.id}`}
               volunteerId={card.id}
               onSessionExpired={onSessionExpired}
             />
