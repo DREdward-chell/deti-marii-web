@@ -734,9 +734,6 @@ textarea[aria-invalid='true'] {
   .header-actions {
     gap: 10px;
   }
-  .header-actions .chip {
-    display: none;
-  }
   .intro {
     font-size: 17px;
   }
@@ -744,13 +741,6 @@ textarea[aria-invalid='true'] {
     width: 100%;
   }
 }
-/* смена темы: новая тема раскрывается кругом от переключателя (ThemeToggle) */
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation: none;
-  mix-blend-mode: normal;
-}
-
 @media (prefers-reduced-motion: reduce) {
   *,
   ::before,

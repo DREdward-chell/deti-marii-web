@@ -6,7 +6,6 @@ import { getSession, logout, type Account } from './shared/api/auth'
 import { errorMessage } from './shared/api/client'
 import { Button } from './shared/ui/Button'
 import { Card } from './shared/ui/Card'
-import { Chip } from './shared/ui/Chip'
 import { Journey } from './shared/ui/Journey'
 import { ThemeToggle } from './shared/ui/ThemeToggle'
 
@@ -57,7 +56,6 @@ export default function App() {
           <span>Пространство волонтёров</span>
         </a>
         <div className="header-actions">
-          <Chip tone="muted">Прототип</Chip>
           <ThemeToggle />
           {account && (
             <Button
