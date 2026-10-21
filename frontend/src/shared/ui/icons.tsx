@@ -1,3 +1,19 @@
+export function ArrowIcon() {
+  return (
+    <svg
+      viewBox="0 0 32 16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M2 8h27M23 2l6 6-6 6" />
+    </svg>
+  )
+}
+
 export function CheckIcon() {
   return (
     <svg
