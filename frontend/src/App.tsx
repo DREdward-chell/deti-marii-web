@@ -1,28 +1,47 @@
-import { useEffect, useState } from 'react'
-import { getSystemInfo } from './shared/api/system'
-
-type ConnectionState = 'loading' | 'connected' | 'unavailable'
-
-const connectionLabels: Record<ConnectionState, string> = {
-  loading: 'Подключаемся к пространству…',
-  connected: 'Соединение установлено',
-  unavailable: 'Сейчас не удалось подключиться. Попробуйте обновить страницу.',
-}
+import { useCallback, useEffect, useState } from 'react'
+import { AuthForm } from './features/auth/AuthForm'
+import { ProfileForm } from './features/profile/ProfileForm'
+import { getSession, logout, type Account } from './shared/api/auth'
+import { errorMessage } from './shared/api/client'
 
 export default function App() {
-  const [connection, setConnection] = useState<ConnectionState>('loading')
+  const [account, setAccount] = useState<Account | null | undefined>(undefined)
+  const [loadError, setLoadError] = useState('')
+  const [attempt, setAttempt] = useState(0)
+  const [notice, setNotice] = useState('')
+  const [signingOut, setSigningOut] = useState(false)
 
   useEffect(() => {
     const controller = new AbortController()
-    void getSystemInfo(controller.signal)
-      .then(() => {
-        if (!controller.signal.aborted) setConnection('connected')
+    void getSession(controller.signal)
+      .then((session) => {
+        if (!controller.signal.aborted) setAccount(session)
       })
-      .catch(() => {
-        if (!controller.signal.aborted) setConnection('unavailable')
+      .catch((error: unknown) => {
+        if (!controller.signal.aborted) setLoadError(errorMessage(error))
       })
     return () => controller.abort()
+  }, [attempt])
+
+  const expired = useCallback(() => {
+    setAccount(null)
+    setNotice(
+      'Сессия завершилась. Войдите ещё раз. Несохранённые изменения не отправлены.',
+    )
   }, [])
+
+  async function signOut() {
+    setSigningOut(true)
+    setNotice('')
+    try {
+      await logout()
+      setAccount(null)
+    } catch (error) {
+      setNotice(errorMessage(error))
+    } finally {
+      setSigningOut(false)
+    }
+  }
 
   return (
     <div className="page">
@@ -30,24 +49,76 @@ export default function App() {
         <a className="brand" href="/" aria-label="Дети Марии — главная">
           Дети Марии<span>Благотворительный фонд</span>
         </a>
-        <span className="preview-label">Прототип</span>
+        <div className="header-actions">
+          <span className="preview-label">Прототип</span>
+          {account && (
+            <button
+              className="text-button"
+              disabled={signingOut}
+              onClick={() => void signOut()}
+            >
+              {signingOut ? 'Выходим…' : 'Выйти'}
+            </button>
+          )}
+        </div>
       </header>
       <main>
-        <p className="eyebrow">Помощь начинается со знакомства</p>
-        <h1>Пространство волонтёров</h1>
-        <p className="intro">
-          Готовим место, где удобно находить своё дело, учиться новому и видеть
-          свой вклад в жизнь фонда.
-        </p>
-        <div className="journey" aria-label="Путь волонтёра">
-          <span>Знакомство</span>
-          <span>Подготовка</span>
-          <span>Участие</span>
-        </div>
-        <p className={`connection connection--${connection}`} role="status">
-          <span className="connection-dot" aria-hidden="true" />
-          {connectionLabels[connection]}
-        </p>
+        {notice && (
+          <p className="notice" role="status">
+            {notice}
+          </p>
+        )}
+        {loadError ? (
+          <section className="form-card">
+            <h1>Не удалось открыть пространство</h1>
+            <p role="alert">{loadError}</p>
+            <button
+              className="secondary-button"
+              onClick={() => {
+                setLoadError('')
+                setAttempt((value) => value + 1)
+              }}
+            >
+              Попробовать снова
+            </button>
+          </section>
+        ) : account === undefined ? (
+          <p className="notice" role="status">
+            Открываем пространство волонтёров…
+          </p>
+        ) : account === null ? (
+          <div className="welcome-layout">
+            <section className="welcome-copy">
+              <p className="eyebrow">Помощь начинается со знакомства</p>
+              <h1>
+                У каждого есть
+                <br />
+                своё доброе дело.
+              </h1>
+              <p className="intro">
+                Расскажите о себе, своих интересах и удобном ритме участия в
+                жизни фонда.
+              </p>
+              <ol className="journey">
+                <li>Создайте аккаунт</li>
+                <li>Заполните анкету</li>
+                <li>Возвращайтесь и дополняйте</li>
+              </ol>
+            </section>
+            <AuthForm
+              onLogin={(next) => {
+                setAccount(next)
+                setNotice('')
+              }}
+            />
+          </div>
+        ) : (
+          <ProfileForm
+            key={account.id}
+            email={account.email}
+            onSessionExpired={expired}
+          />
+        )}
       </main>
       <footer>Дети Марии · Вместе создаём пространство заботы</footer>
     </div>

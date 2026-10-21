@@ -1,5 +1,5 @@
 @org.springframework.modulith.ApplicationModule(
     displayName = "Профили волонтёров",
-    allowedDependencies = {""}
+    allowedDependencies = {"identity"}
 )
 package org.detimarii.platform.volunteers;

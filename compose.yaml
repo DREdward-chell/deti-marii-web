@@ -22,6 +22,8 @@ services:
       dockerfile: backend/Dockerfile
     environment:
       SERVER_PORT: 8080
+      # Backend is private; Caddy supplies the client address and scheme.
+      FORWARD_HEADERS_STRATEGY: native
       DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-volunteers}
       POSTGRES_USER: ${POSTGRES_USER:-volunteers}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Copy .env.example to .env first}
