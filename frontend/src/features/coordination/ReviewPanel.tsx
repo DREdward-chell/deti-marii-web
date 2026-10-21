@@ -19,9 +19,12 @@ import { TextArea } from '../../shared/ui/TextArea'
 export function ReviewPanel({
   volunteerId,
   onSessionExpired,
+  onChange,
 }: {
   volunteerId: string
   onSessionExpired: () => void
+  /** Вызывается после сохранения: сводка карточки показывает новый статус. */
+  onChange?: (review: StaffReview) => void
 }) {
   const [review, setReview] = useState<StaffReview | null>(null)
   const [error, setError] = useState('')
@@ -71,7 +74,10 @@ export function ReviewPanel({
             key={volunteerId}
             initial={review.current}
             volunteerId={volunteerId}
-            onSaved={setReview}
+            onSaved={(value) => {
+              setReview(value)
+              onChange?.(value)
+            }}
             onReload={reload}
             onSessionExpired={onSessionExpired}
           />

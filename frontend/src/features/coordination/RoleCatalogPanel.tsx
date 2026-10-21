@@ -30,7 +30,8 @@ export function RoleCatalogPanel({
     </div>
   )
 }
-function RoleCatalogEditor({
+/** Справочник видов помощи без кнопки-переключателя: для отдельного раздела. */
+export function RoleCatalogEditor({
   onSessionExpired,
 }: {
   onSessionExpired: () => void

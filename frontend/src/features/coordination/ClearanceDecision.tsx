@@ -17,11 +17,14 @@ type Props = {
   volunteerId: string
   roleId: string | null
   onSessionExpired: () => void
+  /** Вызывается после сохранения решения. */
+  onChange?: (decision: DecisionHistory) => void
 }
 export function ClearanceDecision({
   volunteerId,
   roleId,
   onSessionExpired,
+  onChange,
 }: Props) {
   const [decision, setDecision] = useState<DecisionHistory | null>(null)
   const [error, setError] = useState('')
@@ -67,7 +70,10 @@ export function ClearanceDecision({
         volunteerId={volunteerId}
         roleId={roleId}
         onSessionExpired={onSessionExpired}
-        onSaved={setDecision}
+        onSaved={(value) => {
+          setDecision(value)
+          onChange?.(value)
+        }}
         onReload={reload}
       />
       <details className="review-history">

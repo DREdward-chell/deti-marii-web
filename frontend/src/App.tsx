@@ -216,7 +216,11 @@ function AccountApp() {
               workspace={workspace}
               onChange={setWorkspace}
             />
-            <CoordinatorWorkspace key={account.id} onSessionExpired={expired} />
+            <CoordinatorWorkspace
+              key={account.id}
+              account={account}
+              onSessionExpired={expired}
+            />
           </>
         ) : !account.roles.includes('VOLUNTEER') ? (
           <p className="notice">
