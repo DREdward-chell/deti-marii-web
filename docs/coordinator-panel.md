@@ -6,13 +6,13 @@
 
 ## Разделы
 
-| Раздел | Что делает координатор | Данные |
-| --- | --- | --- |
-| **Люди** | Ищет анкеты, открывает карточку: сводка «где сейчас человек», приём в команду, рассмотрение, оформление, допуски | API (`/coordination/volunteers...`, review, paperwork, admissions); **приём — демо** |
-| **Мероприятия** | Создаёт черновик, публикует, видит отклики, подтверждает или отклоняет с учётом мест, отменяет | **демо** |
-| **Обучение** | Ведёт маршрут «Первые шаги в фонде»: порядок уроков, редактор блоков, предпросмотр, публикация и снятие с публикации | **демо** |
-| **Виды помощи** | Справочник для допусков | API (`/coordination/volunteer-roles`) |
-| **Сотрудники** (только `ADMIN`) | Выдаёт и снимает роль координатора по email | **демо**; сейчас — `scripts/coordinator-access.sh` |
+| Раздел                          | Что делает координатор                                                                                               | Данные                                                                               |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| **Люди**                        | Ищет анкеты, открывает карточку: сводка «где сейчас человек», приём в команду, рассмотрение, оформление, допуски     | API (`/coordination/volunteers...`, review, paperwork, admissions); **приём — демо** |
+| **Мероприятия**                 | Создаёт черновик, публикует, видит отклики, подтверждает или отклоняет с учётом мест, отменяет                       | **демо**                                                                             |
+| **Обучение**                    | Ведёт маршрут «Первые шаги в фонде»: порядок уроков, редактор блоков, предпросмотр, публикация и снятие с публикации | **демо**                                                                             |
+| **Виды помощи**                 | Справочник для допусков                                                                                              | API (`/coordination/volunteer-roles`)                                                |
+| **Сотрудники** (только `ADMIN`) | Выдаёт и снимает роль координатора по email                                                                          | **демо**; сейчас — `scripts/coordinator-access.sh`                                   |
 
 Демо-разделы помечены на экране и хранят данные только в `localStorage` этого браузера (`dm-demo-*`). Каждый работает через свой репозиторий (`membership.ts`, `staffEvents.ts`, `lessons.ts`, `staffAccess.ts`): когда появится API, меняется репозиторий, экраны остаются.
 
@@ -28,10 +28,10 @@
 
 ### Приём в команду (BE-02)
 
-| Метод | Путь | Результат |
-| --- | --- | --- |
-| GET | `/coordination/volunteers/{id}/membership` | `200`, `{current, history}`; исходно `NOT_ACCEPTED`, версия `0` |
-| PUT | `/coordination/volunteers/{id}/membership` | `200`, сохранённое решение; тело `{version, fields: {status, message}}` |
+| Метод | Путь                                       | Результат                                                               |
+| ----- | ------------------------------------------ | ----------------------------------------------------------------------- |
+| GET   | `/coordination/volunteers/{id}/membership` | `200`, `{current, history}`; исходно `NOT_ACCEPTED`, версия `0`         |
+| PUT   | `/coordination/volunteers/{id}/membership` | `200`, сохранённое решение; тело `{version, fields: {status, message}}` |
 
 `status`: `NOT_ACCEPTED`, `ACCEPTED`, `PAUSED`, `REVOKED`. `message` видит волонтёр, до 2000 символов; для `PAUSED` и `REVOKED` обязательно. Внутренняя заметка не нужна: для неё есть рассмотрение. В списке `/coordination/volunteers` полезно вернуть `membershipStatus` у каждой анкеты — тогда отметку «Принят в команду» не придётся догружать. Разрешение на обучение для волонтёра вычисляется сервером из этого состояния; отзыв закрывает обучение на следующем запросе.
 
@@ -41,36 +41,36 @@
 
 Волонтёрская сторона описана в `docs/calendar.md`. Координатору:
 
-| Метод | Путь | Результат |
-| --- | --- | --- |
-| GET | `/coordination/events` | `200`, мероприятия с откликами |
-| POST | `/coordination/events` | `201`, черновик |
-| PUT | `/coordination/events/{eventId}` | `200`; `{version, fields}` |
-| PUT | `/coordination/events/{eventId}/status` | `200`; `{version, status}`: `DRAFT`, `PUBLISHED`, `CANCELLED` |
-| PUT | `/coordination/events/{eventId}/responses/{responseId}` | `200`; `{version, status}`: `CONFIRMED`, `DECLINED` |
+| Метод | Путь                                                    | Результат                                                     |
+| ----- | ------------------------------------------------------- | ------------------------------------------------------------- |
+| GET   | `/coordination/events`                                  | `200`, мероприятия с откликами                                |
+| POST  | `/coordination/events`                                  | `201`, черновик                                               |
+| PUT   | `/coordination/events/{eventId}`                        | `200`; `{version, fields}`                                    |
+| PUT   | `/coordination/events/{eventId}/status`                 | `200`; `{version, status}`: `DRAFT`, `PUBLISHED`, `CANCELLED` |
+| PUT   | `/coordination/events/{eventId}/responses/{responseId}` | `200`; `{version, status}`: `CONFIRMED`, `DECLINED`           |
 
 Поля: `title` (до 120), `description`, `direction` (`creative`, `community`, `learning`, `help` — как в календаре), `startsAt`, `endsAt` (ISO 8601 с зоной, конец позже начала), `location`, `roleName` (или `roleId` из справочника видов помощи), `requirements`, `capacity` (целое 1–500 или `null` — без ограничения). Подтверждение сверх `capacity` — `409`; уменьшение `capacity` ниже числа подтверждённых — `409`. Отклики решаются только у опубликованного мероприятия. Проверка мест, смена статуса отклика и постановка уведомления — одна транзакция.
 
 ### Уроки (BE-03)
 
-| Метод | Путь | Результат |
-| --- | --- | --- |
-| GET | `/coordination/lessons` | `200`, уроки маршрута по порядку |
-| POST | `/coordination/lessons` | `201`, черновик |
-| PUT | `/coordination/lessons/{lessonId}` | `200`; `{version, fields: {title, goal, source, blocks}}` |
-| POST | `/coordination/lessons/{lessonId}/publish` | `200`; `{version}`; `400` со списком того, что мешает |
-| POST | `/coordination/lessons/{lessonId}/unpublish` | `200`; `{version}` |
-| PUT | `/coordination/lessons/order` | `200`; `{ids: [...]}` |
+| Метод | Путь                                         | Результат                                                 |
+| ----- | -------------------------------------------- | --------------------------------------------------------- |
+| GET   | `/coordination/lessons`                      | `200`, уроки маршрута по порядку                          |
+| POST  | `/coordination/lessons`                      | `201`, черновик                                           |
+| PUT   | `/coordination/lessons/{lessonId}`           | `200`; `{version, fields: {title, goal, source, blocks}}` |
+| POST  | `/coordination/lessons/{lessonId}/publish`   | `200`; `{version}`; `400` со списком того, что мешает     |
+| POST  | `/coordination/lessons/{lessonId}/unpublish` | `200`; `{version}`                                        |
+| PUT   | `/coordination/lessons/order`                | `200`; `{ids: [...]}`                                     |
 
 Блоки: `TEXT {text}`, `CARDS {cards: [{title, text}]}`, `ORDER {prompt, steps}` (в правильном порядке), `CHOICE {question, options: [{text, correct, explanation}]}`. Условия публикации — `lessonProblems` в `lessons.ts`: название и цель, хотя бы один блок, хотя бы один интерактивный блок, у карточек минимум две, у порядка — три шага, у ситуации — два варианта, отмеченный подходящий и объяснение к каждому. Правка опубликованного урока не меняет то, что видят волонтёры, до повторной публикации; попытки и прогресс привязаны к опубликованной версии. Снятие с публикации не удаляет историю прохождения.
 
 ### Сотрудники (только `ADMIN`)
 
-| Метод | Путь | Результат |
-| --- | --- | --- |
-| GET | `/admin/staff` | `200`, `[{id, email, roles, grantedAt, grantedBy}]` |
-| POST | `/admin/staff` | `200`; `{email}` — выдать `COORDINATOR` существующему аккаунту |
-| DELETE | `/admin/staff/{accountId}/roles/COORDINATOR` | `204` |
+| Метод  | Путь                                         | Результат                                                      |
+| ------ | -------------------------------------------- | -------------------------------------------------------------- |
+| GET    | `/admin/staff`                               | `200`, `[{id, email, roles, grantedAt, grantedBy}]`            |
+| POST   | `/admin/staff`                               | `200`; `{email}` — выдать `COORDINATOR` существующему аккаунту |
+| DELETE | `/admin/staff/{accountId}/roles/COORDINATOR` | `204`                                                          |
 
 Как в `scripts/coordinator-access.sh`: роль меняется в одной транзакции, `security_version` увеличивается (открытые сессии закрываются на следующем запросе), запись в `staff_access_audit`. Свою роль снять нельзя (`409`), неизвестный email — `404`. Сейчас `ADMIN` ничего не открывает: эти маршруты — первое, что ему стоит дать.
 
