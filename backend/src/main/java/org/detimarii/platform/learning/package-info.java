@@ -1,5 +1,5 @@
 @org.springframework.modulith.ApplicationModule(
     displayName = "Учебные маршруты и прогресс",
-    allowedDependencies = {"volunteers", "onboarding"}
+    allowedDependencies = {"volunteers", "onboarding", "identity"}
 )
 package org.detimarii.platform.learning;

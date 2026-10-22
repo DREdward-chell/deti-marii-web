@@ -3,6 +3,10 @@ import { AccountPage } from './features/account/AccountPage'
 import { AuthForm } from './features/auth/AuthForm'
 import { CalendarPage } from './features/calendar/CalendarPage'
 import { CoordinatorWorkspace } from './features/coordination/CoordinatorWorkspace'
+import { CourseWorkspace } from './features/learning/CourseWorkspace'
+import { LearningWorkspace } from './features/learning/LearningWorkspace'
+import { OpportunityCatalog } from './features/opportunities/OpportunityCatalog'
+import { OpportunityWorkspace } from './features/opportunities/OpportunityWorkspace'
 import { LearningPage } from './features/learning/LearningPage'
 import { ProfileForm } from './features/profile/ProfileForm'
 import logo from './assets/logo.svg'
@@ -24,6 +28,14 @@ const demoCalendar = () =>
   calendarRoute() &&
   new URLSearchParams(window.location.search).get('demo') === '1'
 const leaveDemo = () => window.location.assign('/')
+
+type Workspace =
+  | 'coordination'
+  | 'volunteer'
+  | 'courses'
+  | 'opportunities'
+  | 'learning'
+  | 'catalog'
 
 export default function App() {
   // Демо-календарь на вымышленных событиях открывается без входа и сервера.
@@ -61,9 +73,9 @@ function AccountApp() {
     null,
   )
   // У кого есть обе роли, выбирает раздел; координатор начинает со своего.
-  const [workspace, setWorkspace] = useState<'coordination' | 'volunteer'>(
-    'coordination',
-  )
+  const [workspace, setWorkspace] = useState<Workspace>('coordination')
+  // Редакторы курса и возможностей не дают уйти с несохранёнными правками.
+  const [navigationBlocked, setNavigationBlocked] = useState(false)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -126,7 +138,7 @@ function AccountApp() {
             <Button
               variant="quiet"
               size="sm"
-              disabled={signingOut}
+              disabled={signingOut || navigationBlocked}
               onClick={() => void signOut()}
             >
               {signingOut ? 'Выходим…' : 'Выйти'}
@@ -215,6 +227,44 @@ function AccountApp() {
             accountId={account.id}
             email={account.email}
           />
+        ) : (workspace === 'courses' || workspace === 'opportunities') &&
+          account.roles.includes('COORDINATOR') ? (
+          <>
+            <WorkspaceTabs
+              account={account}
+              workspace={workspace}
+              blocked={navigationBlocked}
+              onChange={setWorkspace}
+            />
+            {workspace === 'courses' ? (
+              <CourseWorkspace
+                key={account.id}
+                onSessionExpired={expired}
+                onNavigationBlocked={setNavigationBlocked}
+              />
+            ) : (
+              <OpportunityWorkspace
+                key={account.id}
+                onSessionExpired={expired}
+                onNavigationBlocked={setNavigationBlocked}
+              />
+            )}
+          </>
+        ) : (workspace === 'learning' || workspace === 'catalog') &&
+          account.roles.includes('VOLUNTEER') ? (
+          <>
+            <WorkspaceTabs
+              account={account}
+              workspace={workspace}
+              blocked={navigationBlocked}
+              onChange={setWorkspace}
+            />
+            {workspace === 'learning' ? (
+              <LearningWorkspace key={account.id} onSessionExpired={expired} />
+            ) : (
+              <OpportunityCatalog key={account.id} onSessionExpired={expired} />
+            )}
+          </>
         ) : account.roles.includes('COORDINATOR') &&
           (workspace === 'coordination' ||
             !account.roles.includes('VOLUNTEER')) ? (
@@ -222,6 +272,7 @@ function AccountApp() {
             <WorkspaceTabs
               account={account}
               workspace={workspace}
+              blocked={navigationBlocked}
               onChange={setWorkspace}
             />
             <CoordinatorWorkspace
@@ -240,6 +291,7 @@ function AccountApp() {
             <WorkspaceTabs
               account={account}
               workspace={workspace}
+              blocked={navigationBlocked}
               onChange={setWorkspace}
             />
             <AccountPage
@@ -285,37 +337,52 @@ function AccountApp() {
   )
 }
 
-/** Переключатель разделов для аккаунта, у которого есть и роль координатора, и роль волонтёра. */
+/** Разделы кабинета: координатор — анкеты, учебные маршруты и возможности; волонтёр — кабинет, обучение и поиск дела. */
 function WorkspaceTabs({
   account,
   workspace,
+  blocked,
   onChange,
 }: {
   account: Account
-  workspace: 'coordination' | 'volunteer'
-  onChange: (workspace: 'coordination' | 'volunteer') => void
+  workspace: Workspace
+  blocked: boolean
+  onChange: (workspace: Workspace) => void
 }) {
-  if (
-    !account.roles.includes('COORDINATOR') ||
-    !account.roles.includes('VOLUNTEER')
-  )
-    return null
+  const coordinator = account.roles.includes('COORDINATOR')
+  const volunteer = account.roles.includes('VOLUNTEER')
+  const tabs: [Workspace, string][] = [
+    ...(coordinator
+      ? ([
+          ['coordination', 'Кабинет координатора'],
+          ['courses', 'Учебные маршруты'],
+          ['opportunities', 'Возможности помощи'],
+        ] as [Workspace, string][])
+      : []),
+    ...(volunteer
+      ? ([
+          ['volunteer', 'Моя анкета'],
+          ['learning', 'Моё обучение'],
+          ['catalog', 'Найти дело'],
+        ] as [Workspace, string][])
+      : []),
+  ]
+  // Волонтёр без роли координатора начинает со своего кабинета.
+  const current =
+    !coordinator && workspace === 'coordination' ? 'volunteer' : workspace
   return (
     <nav className="workspace-tabs" aria-label="Раздел кабинета">
-      <button
-        type="button"
-        aria-pressed={workspace === 'coordination'}
-        onClick={() => onChange('coordination')}
-      >
-        Кабинет координатора
-      </button>
-      <button
-        type="button"
-        aria-pressed={workspace === 'volunteer'}
-        onClick={() => onChange('volunteer')}
-      >
-        Мой кабинет
-      </button>
+      {tabs.map(([id, label]) => (
+        <button
+          key={id}
+          type="button"
+          aria-pressed={current === id}
+          disabled={blocked}
+          onClick={() => onChange(id)}
+        >
+          {label}
+        </button>
+      ))}
     </nav>
   )
 }

@@ -2175,3 +2175,134 @@ main:has(> .questionnaire-view) > .notice {
     padding-inline: 12px;
   }
 }
+
+.learning-workspace {
+  max-width: 960px;
+  margin: 0 auto;
+}
+.learning-workspace h1 {
+  font-size: clamp(2rem, 4vw, 3.4rem);
+}
+.learning-workspace .form-card {
+  margin: 1.4rem 0;
+}
+.learning-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.8rem;
+  margin: 1rem 0;
+}
+.learning-fields {
+  border: 0;
+  padding: 0;
+  margin: 1.2rem 0;
+  min-width: 0;
+  display: grid;
+  gap: 1.2rem;
+}
+.learning-fields label {
+  display: grid;
+  gap: 0.4rem;
+}
+.learning-fields .inline-choice,
+.learning-fields .answer-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+}
+.learning-fields input[type='checkbox'],
+.learning-fields input[type='radio'] {
+  width: auto;
+  margin-top: 0.3rem;
+  flex-shrink: 0;
+}
+.lesson-editor {
+  border: 1px solid #dcded2;
+  border-radius: 12px;
+  padding: 1.3rem;
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+}
+.lesson-editor legend {
+  font-weight: 700;
+  padding: 0 0.5rem;
+}
+.option-editor {
+  padding: 1rem;
+  background: #f4f4ec;
+  border-radius: 8px;
+  display: grid;
+  gap: 0.7rem;
+}
+.lesson-body {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.8;
+}
+.lesson-nav {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+.lesson-nav [aria-current='step'] {
+  font-weight: 700;
+  text-decoration: underline;
+}
+.answer-option {
+  border: 1px solid #dcded2;
+  border-radius: 10px;
+  padding: 1rem;
+  cursor: pointer;
+}
+.ordering-options {
+  padding-left: 1.6rem;
+}
+.ordering-options li {
+  padding: 0.6rem;
+  border-bottom: 1px solid #dcded2;
+}
+.ordering-options .learning-actions {
+  margin: 0.5rem 0;
+}
+.enrollment-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  margin-top: 1rem;
+}
+.learning-workspace progress {
+  width: 100%;
+  accent-color: #50715b;
+  height: 0.7rem;
+}
+.learning-workspace button {
+  overflow-wrap: anywhere;
+}
+
+.opportunity-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 1rem;
+  margin-block: 1rem;
+}
+.opportunity-filters label {
+  flex: 1 1 12rem;
+}
+.opportunity-facts {
+  display: grid;
+  grid-template-columns: minmax(5rem, 1fr) minmax(0, 2fr);
+  gap: 0.5rem 1rem;
+}
+.opportunity-facts dt {
+  font-weight: 600;
+}
+.opportunity-facts dd {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}

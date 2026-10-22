@@ -14,6 +14,14 @@ class RoleRepository(private val jdbc: JdbcTemplate) {
     ) }
 
     fun list(): List<VolunteerRole> = jdbc.query("select * from onboarding.volunteer_role order by lower(name), id", mapper)
+    fun findAll(ids: Set<UUID>): List<VolunteerRole> {
+        if (ids.isEmpty()) return emptyList()
+        val placeholders = ids.joinToString(",") { "?" }
+        return jdbc.query(
+            "select * from onboarding.volunteer_role where id in ($placeholders) order by lower(name), id",
+            mapper, *ids.toTypedArray(),
+        )
+    }
     fun get(id: UUID, lock: Boolean = false): VolunteerRole? = jdbc.query(
         "select * from onboarding.volunteer_role where id = ?" + if (lock) " for update" else "", mapper, id,
     ).singleOrNull()
