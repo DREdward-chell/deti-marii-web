@@ -6,6 +6,8 @@ import {
   admissionLabels,
   type MyClearance as Clearance,
 } from '../../shared/api/clearance'
+import { Button } from '../../shared/ui/Button'
+import { Card } from '../../shared/ui/Card'
 
 export function MyClearance({
   onSessionExpired,
@@ -30,8 +32,9 @@ export function MyClearance({
     return () => controller.abort()
   }, [attempt, onSessionExpired])
   return (
-    <section
-      className="form-card my-clearance"
+    <Card
+      tone="raised"
+      className="my-clearance"
       aria-labelledby="my-clearance-heading"
     >
       <h2 id="my-clearance-heading">Документы и допуски</h2>
@@ -71,8 +74,9 @@ export function MyClearance({
           </p>
         </>
       )}
-      <button
-        className="text-button"
+      <Button
+        variant="quiet"
+        size="sm"
         onClick={() => {
           setClearance(undefined)
           setError('')
@@ -80,7 +84,7 @@ export function MyClearance({
         }}
       >
         Обновить документы и допуски
-      </button>
-    </section>
+      </Button>
+    </Card>
   )
 }

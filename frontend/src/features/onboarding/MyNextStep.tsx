@@ -6,6 +6,8 @@ import {
   reviewLabels,
   type PublicReview,
 } from '../../shared/api/onboarding'
+import { Button } from '../../shared/ui/Button'
+import { Card } from '../../shared/ui/Card'
 
 export function MyNextStep({
   onSessionExpired,
@@ -30,8 +32,9 @@ export function MyNextStep({
     return () => controller.abort()
   }, [attempt, onSessionExpired])
   return (
-    <section
-      className="form-card next-step-card"
+    <Card
+      tone="raised"
+      className="next-step-card"
       aria-labelledby="next-step-heading"
     >
       <p className="eyebrow">Знакомство с фондом</p>
@@ -64,8 +67,9 @@ export function MyNextStep({
           )}
         </>
       )}
-      <button
-        className="text-button"
+      <Button
+        variant="quiet"
+        size="sm"
         onClick={() => {
           setError('')
           setReview(undefined)
@@ -73,7 +77,7 @@ export function MyNextStep({
         }}
       >
         Обновить сообщение
-      </button>
-    </section>
+      </Button>
+    </Card>
   )
 }

@@ -12,13 +12,19 @@ import {
   type ReviewStatus,
   type StaffReview,
 } from '../../shared/api/onboarding'
+import { Button } from '../../shared/ui/Button'
+import { Card } from '../../shared/ui/Card'
+import { TextArea } from '../../shared/ui/TextArea'
 
 export function ReviewPanel({
   volunteerId,
   onSessionExpired,
+  onChange,
 }: {
   volunteerId: string
   onSessionExpired: () => void
+  /** Вызывается после сохранения: сводка карточки показывает новый статус. */
+  onChange?: (review: StaffReview) => void
 }) {
   const [review, setReview] = useState<StaffReview | null>(null)
   const [error, setError] = useState('')
@@ -43,8 +49,9 @@ export function ReviewPanel({
     setAttempt((value) => value + 1)
   }
   return (
-    <section
-      className="form-card review-panel"
+    <Card
+      tone="raised"
+      className="review-panel"
       aria-labelledby="review-heading"
     >
       <h2 id="review-heading">Рассмотрение анкеты</h2>
@@ -57,9 +64,9 @@ export function ReviewPanel({
           <p className="form-error" role="alert">
             {error}
           </p>
-          <button className="secondary-button" onClick={reload}>
+          <Button variant="secondary" size="sm" onClick={reload}>
             Повторить загрузку рассмотрения
-          </button>
+          </Button>
         </>
       ) : review ? (
         <>
@@ -67,7 +74,10 @@ export function ReviewPanel({
             key={volunteerId}
             initial={review.current}
             volunteerId={volunteerId}
-            onSaved={setReview}
+            onSaved={(value) => {
+              setReview(value)
+              onChange?.(value)
+            }}
             onReload={reload}
             onSessionExpired={onSessionExpired}
           />
@@ -116,7 +126,7 @@ export function ReviewPanel({
       ) : (
         <p role="status">Загружаем рассмотрение…</p>
       )}
-    </section>
+    </Card>
   )
 }
 
@@ -189,9 +199,8 @@ function ReviewEditor({
           ))}
         </select>
         <label htmlFor="review-message">Сообщение волонтёру</label>
-        <textarea
+        <TextArea
           id="review-message"
-          rows={3}
           required
           maxLength={2000}
           value={draft.message}
@@ -255,10 +264,9 @@ function ReviewEditor({
           <p id="review-note-help" className="field-hint">
             Видна только координаторам. Сохранится в истории изменений.
           </p>
-          <textarea
+          <TextArea
             id="review-note"
             aria-describedby="review-note-help"
-            rows={3}
             maxLength={4000}
             value={draft.internalNote}
             onChange={(event) => change('internalNote', event.target.value)}
@@ -275,13 +283,14 @@ function ReviewEditor({
               Ваш текст остаётся в форме. Загрузка актуальной версии заменит его
               сохранёнными данными.
             </p>
-            <button
+            <Button
               type="button"
-              className="secondary-button"
+              variant="secondary"
+              size="sm"
               onClick={onReload}
             >
               Загрузить актуальное рассмотрение
-            </button>
+            </Button>
           </div>
         )}
         {saved && (
@@ -289,9 +298,9 @@ function ReviewEditor({
             Рассмотрение сохранено.
           </p>
         )}
-        <button className="primary-button" disabled={conflict} type="submit">
+        <Button disabled={conflict} type="submit">
           {saving ? 'Сохраняем…' : 'Сохранить рассмотрение'}
-        </button>
+        </Button>
       </fieldset>
     </form>
   )

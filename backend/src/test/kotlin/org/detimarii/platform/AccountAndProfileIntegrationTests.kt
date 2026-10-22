@@ -67,6 +67,9 @@ class AccountAndProfileIntegrationTests @Autowired constructor(
                 .content(json.writeValueAsString(credentials))).andExpect(status().isForbidden)
         }
         assertThat(authPost("register", csrf(), credentials + ("password" to "short")).response.status).isEqualTo(400)
+        assertThat(authPost("register", csrf(), credentials + ("password" to "7-chars")).response.status).isEqualTo(400)
+        assertThat(authPost("register", csrf(), mapOf("email" to email(), "password" to "8-chars!")).response.status)
+            .isEqualTo(201)
     }
 
     @Test

@@ -6,14 +6,20 @@ import {
   type EmailVerification,
 } from '../../shared/api/auth'
 import { ApiError, errorMessage } from '../../shared/api/client'
+import { Button } from '../../shared/ui/Button'
+import { Card } from '../../shared/ui/Card'
 import { EmailCodeForm } from './EmailCodeForm'
 
+/**
+ * onLogin получает registered = true, если человек только что создал аккаунт.
+ * Сотрудникам после пароля сервер присылает проверку по коду из письма.
+ */
 export function AuthForm({
   onLogin,
-  initialVerification,
+  initialVerification = null,
 }: {
-  onLogin: (account: Account) => void
-  initialVerification: EmailVerification | null
+  onLogin: (account: Account, registered: boolean) => void
+  initialVerification?: EmailVerification | null
 }) {
   const [verification, setVerification] = useState(initialVerification)
   const [mode, setMode] = useState<'login' | 'register'>('login')
@@ -36,8 +42,9 @@ export function AuthForm({
       return
     }
     setBusy(true)
+    const registering = mode === 'register'
     try {
-      if (mode === 'register') {
+      if (registering) {
         await register(email.trim(), password)
         setMode('login')
         setNotice(
@@ -49,7 +56,7 @@ export function AuthForm({
         setPassword('')
         setConfirmation('')
         setVerification(result)
-      } else onLogin(result)
+      } else onLogin(result, registering)
     } catch (cause) {
       setError(errorMessage(cause))
       if (cause instanceof ApiError) setFields(cause.fields)
@@ -62,7 +69,7 @@ export function AuthForm({
     return (
       <EmailCodeForm
         initial={verification}
-        onLogin={onLogin}
+        onLogin={(account) => onLogin(account, false)}
         onRestart={() => {
           setVerification(null)
           setNotice('')
@@ -72,8 +79,13 @@ export function AuthForm({
     )
 
   return (
-    <section className="form-card" aria-labelledby="auth-heading">
-      <div className="mode-switch" aria-label="Вход или регистрация">
+    <Card tone="raised" aria-labelledby="auth-heading">
+      <div
+        className="mode-switch"
+        data-mode={mode}
+        aria-label="Вход или регистрация"
+      >
+        <span className="mode-switch-indicator" aria-hidden="true" />
         <button
           type="button"
           aria-pressed={mode === 'login'}
@@ -101,14 +113,16 @@ export function AuthForm({
           Регистрация
         </button>
       </div>
-      <h2 id="auth-heading">
-        {mode === 'login' ? 'Рады видеть вас снова' : 'Давайте познакомимся'}
-      </h2>
-      <p className="muted">
-        {mode === 'login'
-          ? 'Войдите, чтобы открыть свою анкету.'
-          : 'Создайте аккаунт, а затем расскажите немного о себе.'}
-      </p>
+      <div key={mode} className="swap-in">
+        <h2 id="auth-heading">
+          {mode === 'login' ? 'Рады видеть вас снова' : 'Давайте познакомимся'}
+        </h2>
+        <p className="muted">
+          {mode === 'login'
+            ? 'Войдите, чтобы открыть свою анкету.'
+            : 'Создайте аккаунт, а затем расскажите немного о себе.'}
+        </p>
+      </div>
       <form onSubmit={(event) => void submit(event)}>
         <fieldset disabled={busy}>
           <label htmlFor="email">Email</label>
@@ -138,7 +152,7 @@ export function AuthForm({
               mode === 'register' ? 'new-password' : 'current-password'
             }
             required
-            minLength={mode === 'register' ? 15 : 1}
+            minLength={mode === 'register' ? 8 : 1}
             maxLength={128}
             value={password}
             onChange={(event) => setPassword(event.target.value)}
@@ -148,11 +162,16 @@ export function AuthForm({
           <p className="field-hint" id="password-help">
             {fields.password ||
               (mode === 'register'
-                ? 'От 15 до 128 символов. Можно использовать длинную фразу.'
+                ? 'Не меньше 8 символов.'
                 : 'Используйте пароль, который указали при регистрации.')}
           </p>
-          {mode === 'register' && (
-            <>
+          {/* Поле остаётся в разметке, чтобы плавно раскрываться; при входе оно отключено и недоступно. */}
+          <div
+            className="reveal"
+            data-open={mode === 'register'}
+            inert={mode !== 'register'}
+          >
+            <div className="reveal-inner">
               <label htmlFor="confirmation">Повторите пароль</label>
               <input
                 id="confirmation"
@@ -160,12 +179,13 @@ export function AuthForm({
                 type="password"
                 autoComplete="new-password"
                 required
+                disabled={mode !== 'register'}
                 maxLength={128}
                 value={confirmation}
                 onChange={(event) => setConfirmation(event.target.value)}
               />
-            </>
-          )}
+            </div>
+          </div>
           {notice && (
             <p className="notice" role="status">
               {notice}
@@ -176,15 +196,15 @@ export function AuthForm({
               {error}
             </p>
           )}
-          <button className="primary-button" type="submit">
+          <Button className="form-submit" type="submit" block>
             {busy
               ? 'Подождите…'
               : mode === 'login'
                 ? 'Войти'
                 : 'Создать аккаунт'}
-          </button>
+          </Button>
         </fieldset>
       </form>
-    </section>
+    </Card>
   )
 }

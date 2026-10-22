@@ -10,16 +10,21 @@ import {
   type DecisionSnapshot,
   type DecisionStatus,
 } from '../../shared/api/clearance'
+import { Button } from '../../shared/ui/Button'
+import { TextArea } from '../../shared/ui/TextArea'
 
 type Props = {
   volunteerId: string
   roleId: string | null
   onSessionExpired: () => void
+  /** Вызывается после сохранения решения. */
+  onChange?: (decision: DecisionHistory) => void
 }
 export function ClearanceDecision({
   volunteerId,
   roleId,
   onSessionExpired,
+  onChange,
 }: Props) {
   const [decision, setDecision] = useState<DecisionHistory | null>(null)
   const [error, setError] = useState('')
@@ -52,9 +57,9 @@ export function ClearanceDecision({
         <p className="form-error" role="alert">
           {error}
         </p>
-        <button className="secondary-button" onClick={reload}>
+        <Button variant="secondary" size="sm" onClick={reload}>
           Повторить загрузку {kind}
-        </button>
+        </Button>
       </>
     )
   if (!decision) return <p role="status">Загружаем решение…</p>
@@ -65,7 +70,10 @@ export function ClearanceDecision({
         volunteerId={volunteerId}
         roleId={roleId}
         onSessionExpired={onSessionExpired}
-        onSaved={setDecision}
+        onSaved={(value) => {
+          setDecision(value)
+          onChange?.(value)
+        }}
         onReload={reload}
       />
       <details className="review-history">
@@ -184,11 +192,10 @@ function DecisionEditor({
         <label htmlFor={`${prefix}-message`}>
           Пояснение по {paperwork ? 'оформлению' : 'допуску'}
         </label>
-        <textarea
+        <TextArea
           id={`${prefix}-message`}
           required
           maxLength={2000}
-          rows={3}
           value={draft.message}
           onChange={(event) => change('message', event.target.value)}
         />
@@ -203,10 +210,9 @@ function DecisionEditor({
           <p className="field-hint">
             Видна только координаторам. Сохранится в истории.
           </p>
-          <textarea
+          <TextArea
             id={`${prefix}-note`}
             maxLength={4000}
-            rows={2}
             value={draft.internalNote}
             onChange={(event) => change('internalNote', event.target.value)}
           />
@@ -222,13 +228,14 @@ function DecisionEditor({
               Ваш текст остаётся в форме. Загрузка актуального решения заменит
               его сохранёнными данными.
             </p>
-            <button
+            <Button
               type="button"
-              className="secondary-button"
+              variant="secondary"
+              size="sm"
               onClick={onReload}
             >
               Загрузить актуальное решение
-            </button>
+            </Button>
           </div>
         )}
         {saved && (
@@ -236,13 +243,13 @@ function DecisionEditor({
             {paperwork ? 'Оформление сохранено.' : 'Допуск сохранён.'}
           </p>
         )}
-        <button className="primary-button" type="submit" disabled={conflict}>
+        <Button type="submit" disabled={conflict}>
           {saving
             ? 'Сохраняем…'
             : paperwork
               ? 'Сохранить оформление'
               : 'Сохранить допуск'}
-        </button>
+        </Button>
       </fieldset>
     </form>
   )

@@ -6,6 +6,9 @@ import {
   type RoleFields,
   type VolunteerRole,
 } from '../../shared/api/clearance'
+import { Button } from '../../shared/ui/Button'
+import { Card } from '../../shared/ui/Card'
+import { TextArea } from '../../shared/ui/TextArea'
 
 export function RoleCatalogPanel({
   onSessionExpired,
@@ -15,18 +18,20 @@ export function RoleCatalogPanel({
   const [open, setOpen] = useState(false)
   return (
     <div className="role-catalog">
-      <button
-        className="secondary-button"
+      <Button
+        variant="secondary"
+        size="sm"
         aria-expanded={open}
         onClick={() => setOpen(!open)}
       >
         {open ? 'Закрыть справочник видов помощи' : 'Виды помощи'}
-      </button>
+      </Button>
       {open && <RoleCatalogEditor onSessionExpired={onSessionExpired} />}
     </div>
   )
 }
-function RoleCatalogEditor({
+/** Справочник видов помощи без кнопки-переключателя: для отдельного раздела. */
+export function RoleCatalogEditor({
   onSessionExpired,
 }: {
   onSessionExpired: () => void
@@ -105,7 +110,7 @@ function RoleCatalogEditor({
     }
   }
   return (
-    <section className="form-card" aria-labelledby="roles-heading">
+    <Card tone="raised" aria-labelledby="roles-heading">
       <h2 id="roles-heading">Справочник видов помощи</h2>
       <p className="muted">
         Добавьте направления, для которых координатор подтверждает готовность
@@ -116,9 +121,9 @@ function RoleCatalogEditor({
           <p role="alert" className="form-error">
             {loadError}
           </p>
-          <button className="secondary-button" onClick={reload}>
+          <Button variant="secondary" size="sm" onClick={reload}>
             Повторить загрузку справочника
-          </button>
+          </Button>
         </>
       ) : roles === null ? (
         <p role="status">Загружаем справочник…</p>
@@ -153,10 +158,9 @@ function RoleCatalogEditor({
               }}
             />
             <label htmlFor="role-description">Описание вида помощи</label>
-            <textarea
+            <TextArea
               id="role-description"
               maxLength={1000}
-              rows={3}
               value={draft.description}
               onChange={(event) => {
                 setDraft((previous) => ({
@@ -184,13 +188,14 @@ function RoleCatalogEditor({
                   Ваши правки остаются в форме. Повторная загрузка заменит их
                   сохранёнными данными.
                 </p>
-                <button
+                <Button
                   type="button"
-                  className="secondary-button"
+                  variant="secondary"
+                  size="sm"
                   onClick={reload}
                 >
                   Загрузить актуальный справочник
-                </button>
+                </Button>
               </div>
             )}
             {saved && (
@@ -198,20 +203,16 @@ function RoleCatalogEditor({
                 Вид помощи сохранён.
               </p>
             )}
-            <button
-              className="primary-button"
-              type="submit"
-              disabled={conflict}
-            >
+            <Button type="submit" disabled={conflict}>
               {saving
                 ? 'Сохраняем…'
                 : current
                   ? 'Сохранить вид помощи'
                   : 'Добавить вид помощи'}
-            </button>
+            </Button>
           </fieldset>
         </form>
       )}
-    </section>
+    </Card>
   )
 }

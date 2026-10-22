@@ -2,16 +2,22 @@ import { useEffect, useState } from 'react'
 import { ApiError, errorMessage } from '../../shared/api/client'
 import {
   listVolunteerRoles,
+  type DecisionHistory,
   type VolunteerRole,
 } from '../../shared/api/clearance'
 import { ClearanceDecision } from './ClearanceDecision'
+import { Button } from '../../shared/ui/Button'
+import { Card } from '../../shared/ui/Card'
 
 export function ClearancePanel({
   volunteerId,
   onSessionExpired,
+  onPaperworkChange,
 }: {
   volunteerId: string
   onSessionExpired: () => void
+  /** Вызывается после сохранения оформления документов. */
+  onPaperworkChange?: (decision: DecisionHistory) => void
 }) {
   const [roles, setRoles] = useState<VolunteerRole[] | null>(null)
   const [selected, setSelected] = useState('')
@@ -33,8 +39,9 @@ export function ClearancePanel({
   }, [attempt, onSessionExpired])
   const role = roles?.find((item) => item.id === selected)
   return (
-    <section
-      className="form-card clearance-panel"
+    <Card
+      tone="raised"
+      className="clearance-panel"
       aria-labelledby="clearance-heading"
     >
       <h2 id="clearance-heading">Оформление и допуски</h2>
@@ -47,6 +54,7 @@ export function ClearancePanel({
           volunteerId={volunteerId}
           roleId={null}
           onSessionExpired={onSessionExpired}
+          onChange={onPaperworkChange}
         />
       </section>
       <section
@@ -63,15 +71,16 @@ export function ClearancePanel({
             <p role="alert" className="form-error">
               {error}
             </p>
-            <button
-              className="secondary-button"
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={() => {
                 setError('')
                 setAttempt((value) => value + 1)
               }}
             >
               Повторить загрузку видов помощи
-            </button>
+            </Button>
           </>
         ) : roles === null ? (
           <p role="status">Загружаем виды помощи…</p>
@@ -106,6 +115,6 @@ export function ClearancePanel({
           </>
         )}
       </section>
-    </section>
+    </Card>
   )
 }

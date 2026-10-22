@@ -7,7 +7,10 @@ import {
   type EmailVerification,
 } from '../../shared/api/auth'
 import { errorMessage } from '../../shared/api/client'
+import { Button } from '../../shared/ui/Button'
+import { Card } from '../../shared/ui/Card'
 
+/** Второй шаг входа сотрудника: шесть цифр из письма. */
 export function EmailCodeForm({
   initial,
   onLogin,
@@ -75,8 +78,12 @@ export function EmailCodeForm({
   }
 
   return (
-    <section className="form-card" aria-labelledby="code-heading">
-      <p className="eyebrow">Вход сотрудника</p>
+    <Card
+      tone="raised"
+      className="code-card swap-in"
+      aria-labelledby="code-heading"
+    >
+      <p className="code-eyebrow">Вход сотрудника</p>
       <h2 id="code-heading">Проверьте почту</h2>
       <p className="muted">
         Мы отправили код на email вашего аккаунта. Введите шесть цифр из письма.
@@ -88,13 +95,15 @@ export function EmailCodeForm({
           <input
             id="email-code"
             name="code"
+            className="code-input"
             inputMode="numeric"
             autoComplete="one-time-code"
             pattern="[0-9]{6}"
             maxLength={6}
             required
+            placeholder="••••••"
             value={code}
-            onChange={(event) => setCode(event.target.value)}
+            onChange={(event) => setCode(event.target.value.replace(/\D/g, ''))}
           />
           {error && (
             <p className="form-error" role="alert">
@@ -106,28 +115,32 @@ export function EmailCodeForm({
               {notice}
             </p>
           )}
-          <button className="primary-button" type="submit">
+          <Button className="form-submit" type="submit" block>
             {busy ? 'Подождите…' : 'Подтвердить вход'}
-          </button>
-          <button
-            className="text-button"
-            type="button"
-            disabled={remaining > 0}
-            onClick={() => void resend()}
-          >
-            {remaining > 0
-              ? `Отправить повторно через ${remaining} с`
-              : 'Отправить код повторно'}
-          </button>
-          <button
-            className="text-button restart-button"
-            type="button"
-            onClick={() => void restart()}
-          >
-            Начать вход заново
-          </button>
+          </Button>
+          <div className="code-actions">
+            <Button
+              variant="quiet"
+              size="sm"
+              type="button"
+              disabled={remaining > 0}
+              onClick={() => void resend()}
+            >
+              {remaining > 0
+                ? `Отправить повторно через ${remaining} с`
+                : 'Отправить код повторно'}
+            </Button>
+            <Button
+              variant="quiet"
+              size="sm"
+              type="button"
+              onClick={() => void restart()}
+            >
+              Начать вход заново
+            </Button>
+          </div>
         </fieldset>
       </form>
-    </section>
+    </Card>
   )
 }

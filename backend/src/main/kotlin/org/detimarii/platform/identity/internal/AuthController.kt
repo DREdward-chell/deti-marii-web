@@ -34,7 +34,7 @@ data class RegistrationRequest(
     @field:NotBlank @field:Email(message = "Укажите корректный email.") @field:Size(max = 254)
     val email: String,
     @field:NotBlank(message = "Введите пароль.")
-    @field:Size(min = 15, max = 128, message = "Пароль должен содержать от 15 до 128 символов.")
+    @field:Size(min = 8, max = 128, message = "Пароль должен содержать от 8 до 128 символов.")
     val password: String,
 )
 
