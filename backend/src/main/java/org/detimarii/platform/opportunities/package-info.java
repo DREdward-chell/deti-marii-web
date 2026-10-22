@@ -1,5 +1,5 @@
 @org.springframework.modulith.ApplicationModule(
     displayName = "Возможности участия",
-    allowedDependencies = {"onboarding"}
+    allowedDependencies = {"onboarding", "identity"}
 )
 package org.detimarii.platform.opportunities;

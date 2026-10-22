@@ -3,6 +3,8 @@ package org.detimarii.platform.identity.internal
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Repository
 import java.util.UUID
+import java.time.Instant
+import java.sql.Timestamp
 
 enum class AccountRole { VOLUNTEER, COORDINATOR, ADMIN }
 
@@ -40,4 +42,16 @@ class AccountRepository(private val jdbc: JdbcTemplate) {
         { row, _ -> AccountRole.valueOf(row.getString("role")) },
         id,
     ).toSet()
+
+    fun security(id: UUID): AccountSecurity? = jdbc.query(
+        "select email, security_version from identity.account where id = ?",
+        { row, _ -> row.getString("email") to row.getLong("security_version") }, id,
+    ).singleOrNull()?.let { (email, version) -> AccountSecurity(AccountView(id, email, roles(id)), version) }
+
+    fun claimCodeDelivery(id: UUID, now: Instant): Boolean = jdbc.update(
+        """
+        update identity.account set login_code_sent_at = ?
+        where id = ? and (login_code_sent_at is null or login_code_sent_at <= ?)
+        """.trimIndent(), Timestamp.from(now), id, Timestamp.from(now.minusSeconds(60)),
+    ) == 1
 }

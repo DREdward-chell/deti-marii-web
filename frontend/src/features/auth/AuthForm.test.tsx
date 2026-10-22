@@ -4,7 +4,7 @@ import { AuthForm } from './AuthForm'
 
 describe('auth form mode switch', () => {
   it('keeps the password confirmation out of the login form', () => {
-    render(<AuthForm onLogin={() => {}} />)
+    render(<AuthForm onLogin={() => {}} initialVerification={null} />)
     const confirmation = screen.getByLabelText('Повторите пароль')
     expect(confirmation).toBeDisabled()
 

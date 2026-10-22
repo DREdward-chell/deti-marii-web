@@ -43,6 +43,20 @@ function mockApi(
         return response({ account: signedIn ? account : null })
       if (url === '/api/v1/auth/csrf')
         return response({ headerName: 'X-CSRF-TOKEN', token: 'fresh-token' })
+      if (url === '/api/v1/onboarding/me/clearance')
+        return response({
+          paperwork: { status: 'NOT_CONFIRMED', message: '', updatedAt: null },
+          admissions: [],
+        })
+      if (url === '/api/v1/onboarding/me')
+        return response({
+          status: 'NEW',
+          message: '',
+          nextStep: '',
+          nextStepOwner: null,
+          nextStepDate: null,
+          updatedAt: null,
+        })
       if (!init?.method && url === '/api/v1/volunteers/me') {
         if (profileUnavailable)
           return response({ detail: 'Временная ошибка загрузки.' }, 500)
@@ -109,6 +123,7 @@ describe('volunteer account and own profile', () => {
       target: { value: 'a long test passphrase' },
     })
     fireEvent.click(screen.getByRole('button', { name: 'Создать аккаунт' }))
+    // После регистрации сразу анкета, без возврата в кабинет.
     fireEvent.change(await screen.findByLabelText(/Как к вам обращаться/), {
       target: { value: 'Анна' },
     })
@@ -116,7 +131,23 @@ describe('volunteer account and own profile', () => {
       target: { value: 'Рисование' },
     })
     fireEvent.click(screen.getByRole('button', { name: 'Сохранить анкету' }))
-    expect(await screen.findByText(/Анкета сохранена/)).toBeInTheDocument()
+    expect(
+      await screen.findByText(/Без согласия на обработку/),
+    ).toBeInTheDocument()
+    expect(api.writes).toHaveLength(2)
+    expect(
+      screen.queryByRole('button', { name: 'Вернуться в личный кабинет' }),
+    ).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('checkbox', { name: /Согласен/ }))
+    fireEvent.click(screen.getByRole('button', { name: 'Сохранить анкету' }))
+    // После сохранения анкеты — личный кабинет.
+    expect(
+      await screen.findByRole('heading', { name: 'Анна' }),
+    ).toBeInTheDocument()
+    expect(screen.getByText(/Анкета сохранена/)).toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: 'Сохранить анкету' }),
+    ).not.toBeInTheDocument()
     expect(api.writes.map((request) => request.url)).toEqual([
       '/api/v1/auth/register',
       '/api/v1/auth/login',
@@ -131,12 +162,37 @@ describe('volunteer account and own profile', () => {
     expect(api.writes[2].body).not.toHaveProperty('id')
   })
 
+  it('opens the account page right after login, without the questionnaire', async () => {
+    const api = mockApi({ hasProfile: true })
+    render(<App />)
+    fireEvent.change(await screen.findByLabelText('Email'), {
+      target: { value: account.email },
+    })
+    fireEvent.change(screen.getByLabelText('Пароль'), {
+      target: { value: 'a long test passphrase' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Войти' }))
+    expect(
+      await screen.findByRole('heading', { name: 'Анна' }),
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: 'Сохранить анкету' }),
+    ).not.toBeInTheDocument()
+    expect(api.writes.map((request) => request.url)).toEqual([
+      '/api/v1/auth/login',
+    ])
+  })
+
   it('keeps draft edits on conflict until the user explicitly reloads the profile', async () => {
     mockApi({ signedIn: true, hasProfile: true, saveStatus: 409 })
     render(<App />)
+    fireEvent.click(
+      await screen.findByRole('button', { name: 'Открыть анкету' }),
+    )
     const name = await screen.findByLabelText(/Как к вам обращаться/)
     expect(name).toHaveValue('Анна')
     fireEvent.change(name, { target: { value: 'Моя правка' } })
+    fireEvent.click(screen.getByRole('checkbox', { name: /Согласен/ }))
     fireEvent.click(screen.getByRole('button', { name: 'Сохранить анкету' }))
     expect(await screen.findByRole('alert')).toHaveTextContent('другом окне')
     expect(name).toHaveValue('Моя правка')
@@ -153,8 +209,10 @@ describe('volunteer account and own profile', () => {
     mockApi({ signedIn: true, hasProfile: true, saveStatus: 401 })
     render(<App />)
     fireEvent.click(
-      await screen.findByRole('button', { name: 'Сохранить анкету' }),
+      await screen.findByRole('button', { name: 'Открыть анкету' }),
     )
+    fireEvent.click(await screen.findByRole('checkbox', { name: /Согласен/ }))
+    fireEvent.click(screen.getByRole('button', { name: 'Сохранить анкету' }))
     expect(
       await screen.findByRole('button', { name: 'Войти' }),
     ).toBeInTheDocument()
@@ -164,7 +222,7 @@ describe('volunteer account and own profile', () => {
     expect(screen.queryByText(/Анкета сохранена/)).not.toBeInTheDocument()
   })
 
-  it('does not replace an unavailable saved profile with a blank editable form', async () => {
+  it('does not show an unavailable saved profile as empty', async () => {
     const api = mockApi({
       signedIn: true,
       hasProfile: true,
@@ -175,27 +233,26 @@ describe('volunteer account and own profile', () => {
       'ошибка загрузки',
     )
     expect(
-      screen.queryByRole('button', { name: 'Сохранить анкету' }),
+      screen.queryByRole('button', { name: 'Заполнить анкету' }),
     ).not.toBeInTheDocument()
     api.recoverProfile()
     fireEvent.click(screen.getByRole('button', { name: 'Попробовать снова' }))
-    expect(await screen.findByLabelText(/Как к вам обращаться/)).toHaveValue(
-      'Анна',
-    )
+    expect(
+      await screen.findByRole('heading', { name: 'Анна' }),
+    ).toBeInTheDocument()
     expect(api.writes).toHaveLength(0)
   })
 
   it('logs out and removes the private profile from the screen', async () => {
     const api = mockApi({ signedIn: true, hasProfile: true })
     render(<App />)
-    await screen.findByLabelText(/Как к вам обращаться/)
+    await screen.findByRole('heading', { name: 'Анна' })
     fireEvent.click(screen.getByRole('button', { name: 'Выйти' }))
     expect(
       await screen.findByRole('button', { name: 'Войти' }),
     ).toBeInTheDocument()
-    expect(
-      screen.queryByLabelText(/Как к вам обращаться/),
-    ).not.toBeInTheDocument()
+    expect(screen.queryByText('Анна')).not.toBeInTheDocument()
+    expect(screen.queryByText('Рисование')).not.toBeInTheDocument()
     expect(api.writes[0].url).toBe('/api/v1/auth/logout')
   })
 

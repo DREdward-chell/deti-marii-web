@@ -28,6 +28,15 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-volunteers}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Copy .env.example to .env first}
       SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-false}
+      MAIL_ENABLED: ${MAIL_ENABLED:-false}
+      MAIL_FROM: ${MAIL_FROM:-noreply@example.invalid}
+      SMTP_HOST: ${SMTP_HOST:-localhost}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_AUTH: ${SMTP_AUTH:-true}
+      SMTP_STARTTLS: ${SMTP_STARTTLS:-true}
+      SMTP_SSL: ${SMTP_SSL:-false}
     depends_on:
       postgres:
         condition: service_healthy
@@ -50,6 +59,8 @@ services:
     build:
       context: .
       dockerfile: frontend/Dockerfile
+      args:
+        VITE_CALENDAR_API_ENABLED: ${VITE_CALENDAR_API_ENABLED:-false}
     environment:
       SITE_ADDRESS: ${SITE_ADDRESS:-:80}
     ports:
