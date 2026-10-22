@@ -6,4 +6,5 @@ import java.util.UUID
 interface VolunteerProfiles {
     fun ownId(): UUID?
     fun exists(id: UUID): Boolean
+    fun accountId(id: UUID): UUID?
 }

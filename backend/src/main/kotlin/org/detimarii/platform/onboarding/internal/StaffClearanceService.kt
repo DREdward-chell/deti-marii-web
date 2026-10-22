@@ -7,6 +7,8 @@ import org.detimarii.platform.volunteers.VolunteerProfiles
 import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service
+import org.springframework.context.ApplicationEventPublisher
+import org.detimarii.platform.onboarding.VolunteerUpdate
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.server.ResponseStatusException
@@ -18,6 +20,7 @@ import java.util.UUID
 class StaffClearanceService(
     private val records: ClearanceRepository, private val roles: RoleRepository,
     private val profiles: VolunteerProfiles, private val account: CurrentAccount, private val contacts: AccountContacts,
+    private val events: ApplicationEventPublisher,
 ) : ClearanceWorkflow {
     @Transactional(readOnly = true)
     override fun paperwork(volunteerId: UUID): DecisionHistory<PaperworkFields> {
@@ -33,6 +36,10 @@ class StaffClearanceService(
         val current = records.paperwork(volunteerId)
         if (current.fields == fields) return paperworkView(volunteerId, current)
         requireVersion(current.version, request.version)
+        if (current.fields.copy(internalNote = fields.internalNote) != fields) {
+            events.publishEvent(VolunteerUpdate(volunteerId, "paperwork:$volunteerId:${current.version + 1}",
+                "Обновлена информация о ваших документах. Посмотрите решение в личном кабинете."))
+        }
         return paperworkView(volunteerId, records.appendPaperwork(volunteerId, current.version + 1, fields, account.id()))
     }
 
@@ -52,6 +59,10 @@ class StaffClearanceService(
         val current = records.admission(volunteerId, roleId)
         if (current.fields == fields) return admissionView(volunteerId, roleId, current)
         requireVersion(current.version, request.version)
+        if (current.fields.copy(internalNote = fields.internalNote) != fields) {
+            events.publishEvent(VolunteerUpdate(volunteerId, "admission:$volunteerId:$roleId:${current.version + 1}",
+                "Обновлён ваш допуск к виду помощи. Посмотрите решение в личном кабинете."))
+        }
         return admissionView(volunteerId, roleId, records.appendAdmission(volunteerId, roleId, current.version + 1, fields, account.id()))
     }
 

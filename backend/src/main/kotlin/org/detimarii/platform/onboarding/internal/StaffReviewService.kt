@@ -10,6 +10,8 @@ import org.detimarii.platform.volunteers.VolunteerProfiles
 import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Service
+import org.springframework.context.ApplicationEventPublisher
+import org.detimarii.platform.onboarding.VolunteerUpdate
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.server.ResponseStatusException
@@ -21,6 +23,7 @@ import java.util.UUID
 class StaffReviewService(
     private val reviews: ReviewRepository, private val profiles: VolunteerProfiles, private val account: CurrentAccount,
     private val contacts: AccountContacts,
+    private val events: ApplicationEventPublisher,
 ) : ReviewWorkflow {
     @Transactional(readOnly = true)
     override fun get(volunteerId: UUID): StaffReview {
@@ -44,6 +47,10 @@ class StaffReviewService(
         if (current.fields == fields) return view(volunteerId, current)
         if (current.version != request.version) {
             throw ResponseStatusException(HttpStatus.CONFLICT, "Рассмотрение уже изменено. Загрузите актуальную версию перед сохранением.")
+        }
+        if (current.fields.copy(internalNote = fields.internalNote) != fields) {
+            events.publishEvent(VolunteerUpdate(volunteerId, "review:$volunteerId:${current.version + 1}",
+                "Координатор обновил следующий шаг по вашей анкете. Подробности — в личном кабинете."))
         }
         return view(volunteerId, reviews.append(volunteerId, current.version + 1, fields, account.id()))
     }

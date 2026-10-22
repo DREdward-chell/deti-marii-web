@@ -14,6 +14,7 @@ import {
   AccountLearningCard,
   type AccountLearning,
 } from './AccountLearningCard'
+import { TelegramSettings } from '../telegram/TelegramSettings'
 import './account.css'
 
 /** Личный кабинет волонтёра: фото, данные анкеты с правкой на месте и календарь. */
@@ -121,6 +122,7 @@ export function AccountPage({
       {profile && (
         <div className="account-followup">
           <MyNextStep onSessionExpired={onSessionExpired} />
+          <TelegramSettings onSessionExpired={onSessionExpired} />
           <details className="account-clearance">
             <summary>Документы и допуски</summary>
             <MyClearance onSessionExpired={onSessionExpired} />

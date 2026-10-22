@@ -28,6 +28,10 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-volunteers}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Copy .env.example to .env first}
       SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-false}
+      TELEGRAM_ENABLED: ${TELEGRAM_ENABLED:-false}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      TELEGRAM_BOT_USERNAME: ${TELEGRAM_BOT_USERNAME:-}
+      TELEGRAM_SITE_URL: ${TELEGRAM_SITE_URL:-http://localhost:8088}
       MAIL_ENABLED: ${MAIL_ENABLED:-false}
       MAIL_FROM: ${MAIL_FROM:-noreply@example.invalid}
       SMTP_HOST: ${SMTP_HOST:-localhost}

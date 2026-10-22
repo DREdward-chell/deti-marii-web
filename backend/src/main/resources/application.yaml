@@ -50,6 +50,11 @@ spring:
       "[mail.smtp.writetimeout]": 5000
 
 platform:
+  telegram:
+    enabled: ${TELEGRAM_ENABLED:false}
+    token: ${TELEGRAM_BOT_TOKEN:}
+    username: ${TELEGRAM_BOT_USERNAME:}
+    site-url: ${TELEGRAM_SITE_URL:http://localhost:8088}
   mail:
     enabled: ${MAIL_ENABLED:false}
     from: ${MAIL_FROM:noreply@example.invalid}

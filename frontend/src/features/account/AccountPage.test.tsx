@@ -28,6 +28,8 @@ function mockApi({
   vi.stubGlobal(
     'fetch',
     vi.fn(async (url: string, init?: RequestInit) => {
+      if (url === '/api/v1/notifications/telegram')
+        return json({ available: false, linked: false })
       if (url === '/api/v1/auth/csrf')
         return json({ headerName: 'X-CSRF-TOKEN', token: 't' })
       if (url === '/api/v1/onboarding/me')

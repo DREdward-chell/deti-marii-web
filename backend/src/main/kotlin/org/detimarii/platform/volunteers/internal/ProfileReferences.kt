@@ -9,6 +9,11 @@ import java.util.UUID
 
 @Service
 class ProfileReferences(private val jdbc: JdbcTemplate, private val account: CurrentAccount) : VolunteerProfiles {
+    override fun accountId(id: UUID): UUID? = jdbc.query(
+        "select account_id from volunteers.volunteer_profile where id = ?",
+        { row, _ -> row.getObject("account_id", UUID::class.java) }, id,
+    ).singleOrNull()
+
     @PreAuthorize("hasRole('VOLUNTEER')")
     override fun ownId(): UUID? = jdbc.query(
         "select id from volunteers.volunteer_profile where account_id = ?",

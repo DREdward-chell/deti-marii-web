@@ -69,6 +69,8 @@ class SecurityConfiguration {
                     .requestMatchers(HttpMethod.PUT, "/api/v1/coordination/volunteers/*/review").hasRole("COORDINATOR")
                     .requestMatchers(HttpMethod.GET, "/api/v1/coordination/volunteers", "/api/v1/coordination/volunteers/*")
                     .hasRole("COORDINATOR")
+                    .requestMatchers(HttpMethod.GET, "/api/v1/notifications/telegram").hasRole("VOLUNTEER")
+                    .requestMatchers(HttpMethod.POST, "/api/v1/notifications/telegram/link", "/api/v1/notifications/telegram/unlink").hasRole("VOLUNTEER")
                     .anyRequest().denyAll()
             }
             .csrf { it.csrfTokenRepository(csrfTokens) }
